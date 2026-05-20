@@ -1,0 +1,57 @@
+{
+  "project": "Daily AI Insight Engine",
+  "current_learning_goal": "区分 Coding Agent Harness 与 Runtime Agent Harness，并学习 AGENTS.md、linter、CI 如何约束 AI 编程助手。",
+  "last_updated": "2026-05-20",
+  "completed": [
+    "完成真实数据抓取 stage",
+    "完成清洗和标签保留 stage",
+    "完成 LLM 结构化抽取 stage",
+    "完成 ReAct 分析 stage",
+    "完成 ReAct 报告生成 stage",
+    "完成 final quality hook",
+    "把旧的多个空壳 skill 合并为 daily_news_report 总 Skill 和 3 个子 Skill",
+    "新增 conversation router，让普通对话和日报生成分流",
+    "新增可执行 Skill 层 daily_news_report.py",
+    "回退 collect 阶段核心源强制重试代码，数据源数量优先通过 config/sources.json 调整",
+    "补齐 AGENTS.md 中 Coding Agent Harness 与 Runtime Agent Harness 的边界说明",
+    "增强 scripts/harness_linter.py，让项目级 AI 编程规则可被静态检查",
+    "新增 .github/workflows/harness.yml，让 compileall、harness_linter 和 pytest 可在 CI 中自动运行"
+  ],
+  "active_harness_concepts": [
+    "Coding Agent Harness 管 AI 编程助手如何改仓库",
+    "Runtime Agent Harness 管本项目自己的新闻分析 Agent 如何运行",
+    "AGENTS.md 管 Codex / Claude Code / Cursor 的长期项目规则",
+    "feature_list.json 管功能完成标准",
+    "progress.json 管跨会话学习进度和下一步计划",
+    "scripts/harness_linter.py 把项目级规则变成可执行检查",
+    "CI 把 compileall、harness_linter 和 tests 变成自动约束",
+    "State 管共享数据",
+    "Graph 管流程路由",
+    "Stage Gate 管每步产物是否合格",
+    "Hook 管 prompt/state/trace 快照和最终质量检查",
+    "Tool Gateway 管运行时工具白名单",
+    "Context Router 管每个 stage 能看到的上下文",
+    "Prompt Builder 管 prompt 快照",
+    "Skill Loader 管能力说明加载",
+    "Skill Executor 管可被对话 Agent 调用的真实业务能力",
+    "Conversation Router 管普通对话和业务 Skill 分流"
+  ],
+  "next_steps": [
+    {
+      "order": 1,
+      "task": "学习 AGENTS.md，重点区分 Coding Agent Harness 和 Runtime Agent Harness"
+    },
+    {
+      "order": 2,
+      "task": "学习 scripts/harness_linter.py，理解文字规则如何变成可执行检查"
+    },
+    {
+      "order": 3,
+      "task": "学习 .github/workflows/harness.yml，理解 CI 如何约束 Codex/Claude Code 产出的代码"
+    },
+    {
+      "order": 4,
+      "task": "继续按 State -> Graph -> Stage Gate/Linter -> Hook 的顺序学习 runtime harness"
+    }
+  ]
+}
