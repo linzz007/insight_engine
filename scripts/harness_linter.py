@@ -16,6 +16,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_FILES = [
     "AGENTS.md",
+    "README.md",
     "feature_list.json",
     "progress.json",
     "run_chat.py",

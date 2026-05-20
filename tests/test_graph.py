@@ -2,7 +2,18 @@ from insight_engine.harness.graph import build_graph
 from insight_engine.harness.state import InsightEngineState
 
 
-def test_graph_fails_when_raw_items_are_empty():
+def _passing_gate(state: InsightEngineState, stage_name: str) -> dict:
+    return {
+        "stage": stage_name,
+        "passed": True,
+        "issues": [],
+        "metrics": {},
+        "retryable": False,
+    }
+
+
+def test_graph_fails_when_raw_items_are_empty(monkeypatch):
+    monkeypatch.setattr("insight_engine.harness.graph.evaluate_stage_gate", _passing_gate)
     graph = build_graph(handlers={"collect_raw_items": lambda state: state})
 
     state = graph.run(InsightEngineState())
@@ -11,7 +22,9 @@ def test_graph_fails_when_raw_items_are_empty():
     assert state.errors == []
 
 
-def test_graph_runs_to_done_with_minimum_handlers(tmp_path):
+def test_graph_runs_to_done_with_minimum_handlers(tmp_path, monkeypatch):
+    monkeypatch.setattr("insight_engine.harness.graph.evaluate_stage_gate", _passing_gate)
+
     def collect_raw_items(state: InsightEngineState) -> InsightEngineState:
         state.raw_items = [{"title": "AI news"}]
         return state

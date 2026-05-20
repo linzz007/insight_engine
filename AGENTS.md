@@ -35,6 +35,7 @@ Daily AI Insight Engine：从每日新闻信息中提取结构化洞察，生成
 ```text
 insight_engine/
 ├── AGENTS.md                              # AI 编程助手的项目常驻上下文和文件纲要
+├── README.md                              # 人类读者的项目说明、运行方式和清理原则
 ├── .env.example                           # DeepSeek 等环境变量示例
 ├── AI应用笔试题.md                         # 原始项目需求文档
 ├── feature_list.json                      # 功能完成标准和当前状态
@@ -44,7 +45,6 @@ insight_engine/
 │
 ├── docs/
 │   ├── runtime/
-│   │   ├── workflow.md                    # 人看的流程说明，graph.py 才是执行真源
 │   │   ├── global_rules.md                # 所有 LLM stage 共用的短规则
 │   │   └── final_output_format.md         # 最终报告和结构化输出格式
 │   └── rubrics/
