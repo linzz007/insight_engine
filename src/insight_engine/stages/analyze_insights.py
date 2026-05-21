@@ -70,7 +70,7 @@ from typing import Any
 from insight_engine.harness.artifacts import ensure_run_dir, write_json_artifact
 from insight_engine.harness.hooks.after_llm_call import parse_json_output
 from insight_engine.harness.llm_client import OpenAICompatibleChatClient
-from insight_engine.harness.skill_loader import render_skill_context
+from insight_engine.harness.prompt_builder import build_retry_feedback
 from insight_engine.harness.state import (
     ANALYSIS_EVENT_DISPLAY_REQUIRED_FIELDS,
     ANALYSIS_RESULT_FIELD_SPEC,
@@ -281,6 +281,11 @@ def run_analysis_react_loop(
             step_index=step_index,
             expected_step=expected_step,
         )
+        # 重试反馈：告诉 LLM 上一次为什么被 linter 拦截
+        retry_note = ""
+        if step_index == 1:
+            retry_note = build_retry_feedback(state, "analyze_insights")
+
         response = client.chat_json(
             messages=[
                 {
@@ -288,6 +293,7 @@ def run_analysis_react_loop(
                     "content": (
                         "你是受 Harness 约束的分析 Agent。"
                         "你必须用 JSON 选择动作，不能调用未列出的工具，不能编造证据。"
+                        + retry_note
                     ),
                 },
                 {"role": "user", "content": prompt},
@@ -444,9 +450,6 @@ def build_analysis_react_prompt(
             "## analysis_result 字段合同",
             "finish 输出必须满足这个字段合同；字段缺失或理由字段太短会被本地 linter 拦截。",
             json.dumps(ANALYSIS_RESULT_FIELD_SPEC, ensure_ascii=False, indent=2),
-            "",
-            "## 本阶段 Skill",
-            render_skill_context("analyze_insights"),
             "",
             "## 可用 actions",
             json.dumps(

@@ -16,17 +16,10 @@ collect_raw_items
 -> structure_events
 -> analyze_insights
 -> generate_report
--> review_and_eval
 -> done/failed
 ```
 
-graph 使用 `InsightEngineState` 保存每一步的数据，使用 stage gate / hook / final quality hook 控制质量。
-
-## 子 Skill
-
-- `data_preparation`：数据获取、清洗、结构化整理。
-- `news_analysis`：基于结构化事件做洞察分析。
-- `report_generation`：生成 Markdown 报告、HTML 图表和最终质量检查结果。
+graph 使用 `InsightEngineState` 保存每一步的数据，每个 stage 的 gate linter 自动检查产物质量。
 
 ## 输出
 
@@ -37,4 +30,4 @@ graph 使用 `InsightEngineState` 保存每一步的数据，使用 stage gate /
 - `chart_html`：HTML 可视化路径。
 - `pipeline_summary`：完整流程摘要路径。
 - `run_id`：本次运行 ID。
-- `quality_passed`：最终质量 hook 是否通过。
+- `stage_gate_results`：各 stage gate linter 的检查结果。

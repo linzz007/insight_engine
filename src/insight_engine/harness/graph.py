@@ -1,7 +1,8 @@
-"""Harness Graph 模板。
+"""Harness Graph —— stage 状态机。
 
-Graph 只负责一件事：根据 State 决定下一步执行哪个阶段。
-它不负责具体抓数据、清洗、分析、生成报告；这些具体动作放到对应 stage 或 agent 模块里。
+Graph 根据 State 决定 stage 之间的路由。它持有一个 StageHooks 实例，
+在每个 before/after 生命周期节点触发已注册的监听器（linter、trace、
+prompt 快照、state 快照），而 graph 本身不需要知道注册了什么。
 """
 
 from __future__ import annotations
@@ -11,11 +12,9 @@ from dataclasses import dataclass
 import os
 from typing import Literal
 
-from insight_engine.harness.hooks.stage_hooks import after_stage, before_stage
-from insight_engine.harness.stage_gates import evaluate_stage_gate
+from insight_engine.harness.hooks.stage_hooks import StageHooks, build_default_hooks
 from insight_engine.harness.state import InsightEngineState
 
-# 定义这个项目允许出现哪些流程阶段
 StageName = Literal[
     "initialized",
     "collect_raw_items",
@@ -23,64 +22,50 @@ StageName = Literal[
     "structure_events",
     "analyze_insights",
     "generate_report",
-    "review_and_eval",
     "done",
     "failed",
 ]
 
-# 规定每个 stage 函数的统一形式。
-# 好处是 Graph 不需要知道每个 stage 的具体参数，只要把同一个 state 传进去，再拿回一个更新后的 state。
 StageHandler = Callable[[InsightEngineState], InsightEngineState]
 
-# 表示 Graph 做出的一次流程判断。
+
 @dataclass(frozen=True)
 class GraphDecision:
-    """Graph 每次判断后的结果。"""
+    """Graph 每次路由判断的结果。"""
 
     next_stage: StageName
     reason: str
 
 
 class InsightEngineGraph:
-    """最小 Harness 流程图。
+    """基于 hook 生命周期的 stage 状态机。
 
-    使用方式：
+    用法::
 
-    1. 创建 `InsightEngineState`
-    2. 注册每个 stage 对应的处理函数
-    3. 调用 `run(state)`
-    4. Graph 按顺序执行 stage，并根据 State 决定是否继续、重试或失败
-    
-    # graph主类，它代表整个 Harness 的流程控制器
-    # 核心函数:run() decide_next_stage() _decide_after_review()
+        graph = InsightEngineGraph(handlers={...})
+        state = graph.run(state)
+
+    Graph 只调 StageHooks 的 fire_before / fire_after。
+    所有副作用 —— linter 检查、trace 记录、prompt 快照、state 快照 ——
+    都封装在已注册的监听器中，不在 graph 内部硬编码。
     """
 
-    max_retry_count = 1
     max_stage_retry_count = int(os.getenv("HARNESS_STAGE_MAX_RETRY", "1"))
-    # 注册每个 stage 对应的执行函数
-    def __init__(self, handlers: dict[StageName, StageHandler]) -> None:
+
+    def __init__(
+        self,
+        handlers: dict[StageName, StageHandler],
+        hooks: StageHooks | None = None,
+    ) -> None:
         self.handlers = handlers
-   
+        self.hooks = hooks or build_default_hooks()
+
+    # ------------------------------------------------------------------
+    # 公开接口
+    # ------------------------------------------------------------------
+
     def run(self, state: InsightEngineState) -> InsightEngineState:
-        """从当前 State 阶段开始运行，直到 done 或 failed。
-
-        Graph 的执行引擎，它负责真正把流程跑起来
-
-        只要当前 stage 不是 done 或 failed：
-            1. 根据 State 判断下一步
-            2. 把 State 的 current_stage 改成下一步
-            3. 如果下一步是 done/failed，结束
-            4. 找到这个 stage 对应的 handler
-            5. 如果找不到 handler，失败
-            6. 执行 before_stage hook
-            7. 执行 handler
-            8. 如果 handler 抛异常，记录错误并失败
-            9. 如果 handler 成功，执行 after_stage hook
-        返回最终 State
-        
-        
-        
-        """
+        """从当前 state 的阶段开始执行，直到 done 或 failed。"""
         while state.current_stage not in {"done", "failed"}:
             decision = self.decide_next_stage(state)
             state.mark_stage(decision.next_stage)
@@ -88,7 +73,6 @@ class InsightEngineGraph:
             if decision.next_stage in {"done", "failed"}:
                 break
 
-            #根据 stage 名称找到具体执行函数。
             handler = self.handlers.get(decision.next_stage)
             if handler is None:
                 state.add_error(
@@ -98,64 +82,19 @@ class InsightEngineGraph:
                 )
                 state.mark_stage("failed")
                 break
-            
+
             state = self._run_stage_with_gate(state, decision.next_stage, handler)
             if state.current_stage == "failed":
                 break
 
         return state
 
-    def _run_stage_with_gate(
-        self,
-        state: InsightEngineState,
-        stage_name: StageName,
-        handler: StageHandler,
-    ) -> InsightEngineState:
-        """运行一个 stage，并在 stage 结束后做 gate 检查。"""
-        while True:
-            hook_context = before_stage(state, stage_name)
-            try:
-                state = handler(state)
-            except Exception as exc:  # noqa: BLE001
-                after_stage(state, hook_context, error=repr(exc))
-                state.add_error(
-                    stage=stage_name,
-                    message="阶段执行失败",
-                    detail=repr(exc),
-                )
-                state.mark_stage("failed")
-                return state
-
-            gate_result = evaluate_stage_gate(state, stage_name)
-            state.add_stage_gate_result(gate_result)
-            state = after_stage(state, hook_context)
-
-            if gate_result.get("passed"):
-                return state
-
-            current_retry_count = state.stage_retry_counts.get(stage_name, 0)
-            can_retry = bool(gate_result.get("retryable")) and current_retry_count < self.max_stage_retry_count
-            if not can_retry:
-                state.add_error(
-                    stage=stage_name,
-                    message="stage gate 未通过",
-                    detail=gate_result,
-                )
-                state.mark_stage("failed")
-                return state
-
-            retry_count = state.increment_stage_retry(stage_name)
-            state.add_warning(
-                stage=stage_name,
-                message=f"stage gate 未通过，重跑当前 stage：第 {retry_count} 次",
-                detail=gate_result,
-            )
+    # ------------------------------------------------------------------
+    # 路由
+    # ------------------------------------------------------------------
 
     def decide_next_stage(self, state: InsightEngineState) -> GraphDecision:
-        """根据当前 State 判断下一步。
-
-        这里是 Graph 的核心。你可以把它理解成“流程控制规则表”。
-        """
+        """根据当前 stage 和数据是否存在决定下一步路由。"""
         if state.current_stage == "initialized":
             return GraphDecision("collect_raw_items", "初始化完成，开始抓取原始信息")
 
@@ -182,41 +121,84 @@ class InsightEngineGraph:
         if state.current_stage == "generate_report":
             if not state.report_paths:
                 return GraphDecision("failed", "报告路径为空")
-            return GraphDecision("review_and_eval", "报告已生成，进入最终质量 hook 阶段")
-
-        if state.current_stage == "review_and_eval":
-            return self._decide_after_review(state)
+            return GraphDecision("done", "报告已生成，stage gate 已通过，流程完成")
 
         return GraphDecision("failed", f"未知阶段：{state.current_stage}")
 
-    def _decide_after_review(self, state: InsightEngineState) -> GraphDecision:
-        """根据 review/final quality hook 结果决定完成、重试或失败。"""
-        quality_result = state.final_quality_result
-        quality_passed = bool(quality_result.get("passed"))
-        review_passed = bool(state.review_result.get("passed", True))
+    # ------------------------------------------------------------------
+    # 单 stage 执行器（含 hook 生命周期）
+    # ------------------------------------------------------------------
 
-        if quality_passed and review_passed:
-            return GraphDecision("done", "审查和最终质量 hook 通过")
+    def _run_stage_with_gate(
+        self,
+        state: InsightEngineState,
+        stage_name: StageName,
+        handler: StageHandler,
+    ) -> InsightEngineState:
+        """在 hook 生命周期内运行单个 stage，含 gate 检查与重试。
 
-        if state.retry_count >= self.max_retry_count:
-            return GraphDecision("failed", "最终质量 hook 未通过，且已达到最大重试次数")
+        生命周期::
 
-        state.retry_count += 1
-        retry_stage = state.review_result.get("retry_stage") or quality_result.get("retry_stage")
+            fire_before  →  handler()  →  fire_after
+                                             │
+                             ┌─ linter 通过 ─→ 返回 state
+                             │
+                             └─ linter 失败 ─→ 重试或失败
+        """
+        while True:
+            ctx = self.hooks.fire_before(state, stage_name)
 
-        if retry_stage in {
-            "structure_events",
-            "analyze_insights",
-            "generate_report",
-        }:
-            return GraphDecision(retry_stage, "最终质量 hook 未通过，返回指定阶段重试")
+            try:
+                state = handler(state)
+            except Exception as exc:  # noqa: BLE001
+                self.hooks.fire_after(state, stage_name, ctx, error=repr(exc))
+                state.add_error(
+                    stage=stage_name,
+                    message="阶段执行失败",
+                    detail=repr(exc),
+                )
+                state.mark_stage("failed")
+                return state
 
-        return GraphDecision("analyze_insights", "最终质量 hook 未通过，默认回到分析阶段重试")
+            results = self.hooks.fire_after(state, stage_name, ctx)
+
+            # linter 监听器作为 after-hook 注册，其返回值即 gate 判决。
+            gate_result = results.get("evaluate_linter", {})
+            if not gate_result:
+                return state
+
+            if gate_result.get("passed"):
+                return state
+
+            current_retry_count = state.stage_retry_counts.get(stage_name, 0)
+            can_retry = (
+                bool(gate_result.get("retryable"))
+                and current_retry_count < self.max_stage_retry_count
+            )
+            if not can_retry:
+                state.add_error(
+                    stage=stage_name,
+                    message="stage gate 未通过",
+                    detail=gate_result,
+                )
+                state.mark_stage("failed")
+                return state
+
+            retry_count = state.increment_stage_retry(stage_name)
+            state.add_warning(
+                stage=stage_name,
+                message=f"stage gate 未通过，重跑当前 stage：第 {retry_count} 次",
+                detail=gate_result,
+            )
 
 
-def build_graph(handlers: dict[StageName, StageHandler]) -> InsightEngineGraph:
+def build_graph(
+    handlers: dict[StageName, StageHandler],
+    hooks: StageHooks | None = None,
+) -> InsightEngineGraph:
     """创建 Graph 实例。
 
-    后续 daily_news_report_skill 会调用这个函数，并传入真实 stage handler。
+    ``daily_news_report_skill`` 调用此函数，传入真实 stage handler
+    和默认 hook 集合（prompt 快照、linter、trace、state 快照）。
     """
-    return InsightEngineGraph(handlers=handlers)
+    return InsightEngineGraph(handlers=handlers, hooks=hooks)

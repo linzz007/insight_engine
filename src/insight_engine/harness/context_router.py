@@ -1,7 +1,6 @@
 """Context Router。
 
 Context Router 决定每个 stage 能看到哪些 State 字段和运行时文档。
-它不加载 Skill；Skill 统一由 `skill_loader.py` 负责。
 """
 
 from __future__ import annotations
@@ -28,7 +27,6 @@ STAGE_AGENT_PROMPTS = {
     "structure_events": "prompts/agents/structuring_agent.md",
     "analyze_insights": "prompts/agents/analysis_agent.md",
     "generate_report": "prompts/agents/report_agent.md",
-    "review_and_eval": "prompts/agents/reviewer_agent.md",
 }
 
 # 可以使用的state数据
@@ -71,21 +69,6 @@ STAGE_VISIBLE_FIELDS = {
         "errors",
         "warnings",
     ],
-    "review_and_eval": [
-        "run_id",
-        "target_date",
-        "global_raw_items",
-        "global_cleaned_items",
-        "global_structured_events",
-        "ai_raw_items",
-        "ai_cleaned_items",
-        "ai_structured_events",
-        "analysis_result",
-        "report_paths",
-        "artifacts",
-        "errors",
-        "warnings",
-    ],
 }
 
 # 每个阶段需要的运行时文档
@@ -101,11 +84,6 @@ RUNTIME_DOCS = {
     "generate_report": [
         "docs/runtime/global_rules.md",
         "docs/runtime/final_output_format.md",
-    ],
-    "review_and_eval": [
-        "docs/runtime/global_rules.md",
-        "docs/runtime/final_output_format.md",
-        "docs/rubrics/quality_rubric.md",
     ],
 }
 

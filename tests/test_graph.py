@@ -1,20 +1,39 @@
+"""Graph 状态机测试。
+
+验证 graph 路由正确性：
+- 空数据应走到 failed。
+- 完整 5 个 stage 应走到 done。
+"""
+
 from insight_engine.harness.graph import build_graph
-from insight_engine.harness.state import InsightEngineState
+from insight_engine.harness.hooks.stage_hooks import StageHooks
+from insight_engine.harness.state import InsightEngineState, utc_now_iso
 
 
-def _passing_gate(state: InsightEngineState, stage_name: str) -> dict:
-    return {
-        "stage": stage_name,
-        "passed": True,
-        "issues": [],
-        "metrics": {},
-        "retryable": False,
-    }
+def _build_passing_hooks() -> StageHooks:
+    """构造一个 linter 始终通过的 StageHooks，用于隔离测试 graph 路由。"""
+    hooks = StageHooks()
+
+    def _passing_linter(state, stage_name, context, error=None):
+        return {
+            "stage": stage_name,
+            "passed": True,
+            "issues": [],
+            "metrics": {},
+            "retryable": False,
+            "checked_at": utc_now_iso(),
+        }
+
+    hooks.on_after(_passing_linter)
+    return hooks
 
 
-def test_graph_fails_when_raw_items_are_empty(monkeypatch):
-    monkeypatch.setattr("insight_engine.harness.graph.evaluate_stage_gate", _passing_gate)
-    graph = build_graph(handlers={"collect_raw_items": lambda state: state})
+def test_graph_fails_when_raw_items_are_empty():
+    """collect 阶段没有抓到任何数据时，graph 应走到 failed。"""
+    graph = build_graph(
+        handlers={"collect_raw_items": lambda state: state},
+        hooks=_build_passing_hooks(),
+    )
 
     state = graph.run(InsightEngineState())
 
@@ -22,9 +41,8 @@ def test_graph_fails_when_raw_items_are_empty(monkeypatch):
     assert state.errors == []
 
 
-def test_graph_runs_to_done_with_minimum_handlers(tmp_path, monkeypatch):
-    monkeypatch.setattr("insight_engine.harness.graph.evaluate_stage_gate", _passing_gate)
-
+def test_graph_runs_to_done_with_minimum_handlers(tmp_path):
+    """5 个 stage 全部注册且产物齐全时，graph 应走到 done。"""
     def collect_raw_items(state: InsightEngineState) -> InsightEngineState:
         state.raw_items = [{"title": "AI news"}]
         return state
@@ -95,11 +113,6 @@ def test_graph_runs_to_done_with_minimum_handlers(tmp_path, monkeypatch):
         state.report_paths = {"report": str(report_path), "chart_html": str(chart_path)}
         return state
 
-    def review_and_eval(state: InsightEngineState) -> InsightEngineState:
-        state.review_result = {"passed": True}
-        state.final_quality_result = {"passed": True}
-        return state
-
     graph = build_graph(
         handlers={
             "collect_raw_items": collect_raw_items,
@@ -107,8 +120,8 @@ def test_graph_runs_to_done_with_minimum_handlers(tmp_path, monkeypatch):
             "structure_events": structure_events,
             "analyze_insights": analyze_insights,
             "generate_report": generate_report,
-            "review_and_eval": review_and_eval,
-        }
+        },
+        hooks=_build_passing_hooks(),
     )
 
     state = graph.run(InsightEngineState())

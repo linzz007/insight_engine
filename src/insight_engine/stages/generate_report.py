@@ -29,7 +29,14 @@ from typing import Any
 from insight_engine.harness.artifacts import ensure_run_dir
 from insight_engine.harness.llm_client import LLMClientError, OpenAICompatibleChatClient
 from insight_engine.harness.state import (
+    ANALYSIS_RESULT_FIELD_SPEC,
+    CLEANED_ITEM_FIELD_SPEC,
+    RAW_ITEM_FIELD_SPEC,
+    REPORT_PATHS_FIELD_SPEC,
     REPORT_REQUIRED_HEADINGS as REQUIRED_REPORT_HEADINGS,
+    STRUCTURED_EVENT_AI_AREAS,
+    STRUCTURED_EVENT_FIELD_SPEC,
+    STRUCTURED_EVENT_GLOBAL_AREAS,
     InsightEngineState,
 )
 
@@ -257,6 +264,149 @@ def is_empty_value(value: Any) -> bool:
     return False
 
 
+def build_schema_section() -> str:
+    """生成数据字段合同（Schema）章节。
+
+    展示本系统全部 5 个跨阶段字段合同：raw_item → cleaned_item →
+    structured_event → analysis_result → report_paths。
+    每个字段附带类型、是否必填、中文用途说明，以及受控枚举值（如有）。
+    """
+    lines: list[str] = [
+        "## 数据字段合同（Schema）",
+        "",
+        "本系统通过 5 个跨阶段字段合同约束数据质量。每个 stage 负责产出对应字段，",
+        "gate/linter 负责校验字段，下游 stage 按合同消费字段。",
+        "",
+    ]
+
+    # ── Raw Item ──
+    lines.extend(_format_field_spec_table(
+        title="### Raw Item 字段合同（Stage 1: collect_raw_items 产出）",
+        description="原始数据抓取后每个 item 必须满足的结构。global 和 AI 两条数据线共用此合同。",
+        spec=RAW_ITEM_FIELD_SPEC,
+        enums=None,
+    ))
+
+    # ── Cleaned Item ──
+    lines.extend(_format_field_spec_table(
+        title="### Cleaned Item 字段合同（Stage 2: clean_items 产出）",
+        description="清洗去重后每个 item 的字段结构。新增标签、质量分、分析候选标记。",
+        spec=CLEANED_ITEM_FIELD_SPEC,
+        enums=None,
+    ))
+
+    # ── Structured Event ──
+    lines.extend(_format_field_spec_table(
+        title="### Structured Event 字段合同（Stage 3: structure_events 产出）",
+        description="LLM 或 fallback 生成的每条结构化事件字段。URL 和发布时间不允许 LLM 编造。",
+        spec=STRUCTURED_EVENT_FIELD_SPEC,
+        enums={
+            "industry_area（global 数据线）": sorted(STRUCTURED_EVENT_GLOBAL_AREAS),
+            "industry_area（AI 数据线）": sorted(STRUCTURED_EVENT_AI_AREAS),
+            "importance_level": ["high", "medium", "low"],
+            "hotness_score": "0 ~ 100 整数",
+        },
+    ))
+
+    # ── Analysis Result ──
+    lines.extend(_format_analysis_result_spec())
+
+    # ── Report Paths ──
+    lines.extend(_format_field_spec_table(
+        title="### Report Paths 字段合同（Stage 5: generate_report 产出）",
+        description="报告生成后登记的全部产物路径。下游（页面/CLI/audit）按此合同读取文件。",
+        spec=REPORT_PATHS_FIELD_SPEC,
+        enums=None,
+    ))
+
+    # ── Report Required Headings ──
+    lines.extend([
+        "### Report 必须章节",
+        "",
+        "Markdown 报告必须包含以下全部章节标题，由 `generate_report` stage gate linter 自动检查：",
+        "",
+    ])
+    for heading in REQUIRED_REPORT_HEADINGS:
+        lines.append(f"- `{heading}`")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+def _format_field_spec_table(
+    title: str,
+    description: str,
+    spec: dict[str, dict],
+    enums: dict[str, Any] | None,
+) -> list[str]:
+    """把一个 FIELD_SPEC 渲染为 Markdown 表格 + 说明。"""
+    lines = [title, "", description, ""]
+    # 表头
+    lines.append("| 字段名 | 类型 | 必填 | 用途说明 |")
+    lines.append("|--------|------|------|----------|")
+    for field_name, meta in spec.items():
+        req = "**是**" if meta.get("required") else "否"
+        ftype = str(meta.get("type", ""))
+        purpose = str(meta.get("purpose", ""))
+        # 嵌套字段提示
+        extra = meta.get("required_fields") or meta.get("item_required_fields")
+        if extra:
+            sub = "、".join(str(x) for x in extra[:8])
+            purpose += f"（子字段：{sub}）"
+        lines.append(f"| `{field_name}` | {ftype} | {req} | {purpose} |")
+    lines.append("")
+
+    if enums:
+        lines.append("**受控枚举值：**")
+        for label, values in enums.items():
+            if isinstance(values, str):
+                lines.append(f"- {label}：{values}")
+            else:
+                lines.append(f"- {label}：{' / '.join(str(v) for v in values)}")
+        lines.append("")
+
+    return lines
+
+
+def _format_analysis_result_spec() -> list[str]:
+    """单独渲染 analysis_result 字段合同（结构嵌套较深）。"""
+    lines = [
+        "### Analysis Result 字段合同（Stage 4: analyze_insights 产出）",
+        "",
+        "分析阶段的输出是下游报告的输入。每个子字段有独立的类型和必填子字段约束。",
+        "",
+        "| 字段名 | 类型 | 必填 | 用途说明 |",
+        "|--------|------|------|----------|",
+    ]
+    for field_name, meta in ANALYSIS_RESULT_FIELD_SPEC.items():
+        req = "**是**" if meta.get("required") else "否"
+        ftype = str(meta.get("type", ""))
+        purpose = str(meta.get("purpose", ""))
+        sub = meta.get("required_fields") or meta.get("item_required_fields")
+        if sub:
+            sub_str = "、".join(str(x) for x in sub[:12])
+            purpose += f"（子字段：{sub_str}）"
+        lines.append(f"| `{field_name}` | {ftype} | {req} | {purpose} |")
+    lines.append("")
+
+    # trend_judgment 四方向约束
+    lines.extend([
+        "**`trend_judgment` / `trend_reasoning` 必须包含四个方向：**",
+        "- `technology`（技术方向）",
+        "- `application`（应用方向）",
+        "- `policy`（政策方向）",
+        "- `capital`（资本方向）",
+        "",
+        "**`risk_or_opportunity_notes` 每条必须包含：**",
+        "- `area` — 风险/机会领域",
+        "- `note` — 具体提示",
+        "- `reason` — 支撑理由",
+        "- `supporting_event_ids` — 绑定的支撑事件 ID 列表",
+        "",
+    ])
+    return lines
+
+
 def build_markdown_report(
     state: InsightEngineState,
     chart_path: str,
@@ -371,7 +521,11 @@ def build_markdown_report(
             ]
         )
 
-    lines.extend(["## 质量评估摘要", "", "最终质量检查结果由 `final_quality_hook.json` 记录。", ""])
+    lines.extend(["## 质量评估摘要", "", "最终质量检查由 `generate_report` stage gate 自动完成。", ""])
+
+    # 追加数据字段合同章节
+    lines.append(build_schema_section())
+
     return "\n".join(lines)
 
 
@@ -492,6 +646,13 @@ def generate_report_html(
     .note {{ color: #cbd5e1; font-size: 13px; margin: 8px 0 0; }}
     .appendix {{ font-size: 13px; color: #cbd5e1; }}
     .appendix-row {{ border-top: 1px solid var(--line); padding: 8px 0; }}
+    .schema-table {{ margin-bottom: 22px; }}
+    .schema-table h3 {{ color: var(--accent-2); font-size: 15px; margin: 0 0 6px; }}
+    .schema-table p {{ color: var(--muted); font-size: 13px; margin: 0 0 10px; }}
+    .schema-table table {{ width: 100%; border-collapse: collapse; font-size: 12px; }}
+    .schema-table th, .schema-table td {{ border: 1px solid var(--line); padding: 7px 8px; text-align: left; }}
+    .schema-table th {{ background: #0b1220; color: #e2e8f0; font-weight: 700; }}
+    .schema-table td code {{ color: var(--accent); background: rgba(56, 189, 248, .08); padding: 1px 5px; border-radius: 3px; }}
     @media (max-width: 960px) {{
       .app-shell {{ grid-template-columns: 1fr; }}
       .sidebar {{ position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }}
@@ -517,6 +678,7 @@ def generate_report_html(
         <a href="#trends">趋势判断</a>
         <a href="#risk-opportunity">风险机会</a>
         <a href="#appendix">结构化附录</a>
+        <a href="#schema">字段合同</a>
       </nav>
       <div class="side-meta">run_id<br>{escape(state.run_id)}</div>
     </aside>
@@ -572,7 +734,12 @@ def generate_report_html(
     </section>
     <section class="section" id="quality">
       <h2>质量评估摘要</h2>
-      <p class="note">最终质量检查结果由 <code>final_quality_hook.json</code> 记录。Stage 5 只在标题翻译环节调用 LLM，页面渲染仍使用确定性模板。</p>
+      <p class="note">质量检查由 <code>generate_report</code> stage gate 自动完成。Stage 5 只在标题翻译环节调用 LLM，页面渲染仍使用确定性模板。</p>
+    </section>
+    <section class="section" id="schema">
+      <h2>数据字段合同（Schema）</h2>
+      <p class="note">本系统通过 5 个跨阶段字段合同约束数据质量。每个 stage 负责产出对应字段，gate/linter 负责校验字段，下游 stage 按合同消费字段。</p>
+      {schema_html_tables()}
     </section>
     </main>
   </div>
@@ -1007,6 +1174,74 @@ def translate_area(value: Any) -> str:
 
 
 def escape(value: Any) -> str:
+    """HTML 转义。"""
+    return html.escape(str(value or ""), quote=True)
+
+
+def schema_html_tables() -> str:
+    """将全部 FIELD_SPEC 渲染为 HTML 表格，嵌入报告页面。"""
+    rows: list[str] = []
+
+    rows.append(_html_spec_table(
+        title="Raw Item 字段合同（Stage 1 产出）",
+        desc="原始数据抓取后每个 item 必须满足的结构。global 和 AI 两条数据线共用此合同。",
+        spec=RAW_ITEM_FIELD_SPEC,
+    ))
+
+    rows.append(_html_spec_table(
+        title="Cleaned Item 字段合同（Stage 2 产出）",
+        desc="清洗去重后每个 item 的字段结构。新增标签、质量分、分析候选标记。",
+        spec=CLEANED_ITEM_FIELD_SPEC,
+    ))
+
+    rows.append(_html_spec_table(
+        title="Structured Event 字段合同（Stage 3 产出）",
+        desc="LLM 或 fallback 生成的每条结构化事件字段。URL 和发布时间不允许 LLM 编造。",
+        spec=STRUCTURED_EVENT_FIELD_SPEC,
+    ))
+
+    rows.append(_html_spec_table(
+        title="Analysis Result 字段合同（Stage 4 产出）",
+        desc="分析阶段的输出是下游报告的输入。每个子字段有独立的类型和必填子字段约束。",
+        spec=ANALYSIS_RESULT_FIELD_SPEC,
+    ))
+
+    rows.append(_html_spec_table(
+        title="Report Paths 字段合同（Stage 5 产出）",
+        desc="报告生成后登记的全部产物路径。下游（页面/CLI/audit）按此合同读取文件。",
+        spec=REPORT_PATHS_FIELD_SPEC,
+    ))
+
+    return "\n".join(rows)
+
+
+def _html_spec_table(title: str, desc: str, spec: dict[str, dict]) -> str:
+    """把一个 FIELD_SPEC 渲染为 HTML 表格。"""
+    header = "".join(
+        f"<th>{escape(col)}</th>"
+        for col in ["字段名", "类型", "必填", "用途说明"]
+    )
+    body_rows: list[str] = []
+    for field_name, meta in spec.items():
+        req = "<strong>是</strong>" if meta.get("required") else "否"
+        ftype = escape(meta.get("type", ""))
+        purpose = escape(meta.get("purpose", ""))
+        extra = meta.get("required_fields") or meta.get("item_required_fields")
+        if extra:
+            sub = "、".join(str(x) for x in extra[:8])
+            purpose += f"（子字段：{sub}）"
+        body_rows.append(
+            f"<tr><td><code>{escape(field_name)}</code></td>"
+            f"<td>{ftype}</td><td>{req}</td><td>{purpose}</td></tr>"
+        )
+    return (
+        f'<div class="schema-table">'
+        f"<h3>{escape(title)}</h3>"
+        f"<p>{escape(desc)}</p>"
+        f'<table><thead><tr>{header}</tr></thead>'
+        f"<tbody>{''.join(body_rows)}</tbody></table>"
+        f"</div>"
+    )
     """HTML 转义。"""
     return html.escape(str(value or ""), quote=True)
 

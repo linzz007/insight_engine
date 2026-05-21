@@ -12,7 +12,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-from insight_engine.agents.review_agent import review_and_eval
 from insight_engine.harness.artifacts import ensure_run_dir
 from insight_engine.harness.env import load_project_env
 from insight_engine.harness.graph import InsightEngineGraph, build_graph
@@ -61,7 +60,6 @@ def build_daily_news_report_graph() -> InsightEngineGraph:
             "structure_events": structure_events,
             "analyze_insights": analyze_insights,
             "generate_report": generate_report,
-            "review_and_eval": review_and_eval,
         }
     )
 
@@ -83,13 +81,11 @@ def format_daily_news_report_result(
 ) -> str:
     """把 Skill 结果格式化成页面或 CLI 可以直接展示的中文文本。"""
     state = result.state
-    quality_result = state.final_quality_result
     lines = [
         "今日新闻分析报告已生成。" if state.current_stage == "done" else "今日新闻分析报告生成未完成。",
         "",
         f"- run_id: `{state.run_id}`",
         f"- final_stage: `{state.current_stage}`",
-        f"- quality_passed: `{quality_result.get('passed')}`",
         f"- report: `{result.report_path}`",
         f"- report_html: `{result.report_html_path}`",
         f"- chart_html: `{result.chart_path}`",
@@ -162,7 +158,6 @@ def build_summary_payload(state: InsightEngineState) -> dict[str, Any]:
         "run_id": state.run_id,
         "target_date": state.target_date,
         "final_stage": state.current_stage,
-        "quality_passed": state.final_quality_result.get("passed"),
         "counts": {
             "global_raw_items": len(state.global_raw_items),
             "ai_raw_items": len(state.ai_raw_items),
@@ -182,7 +177,6 @@ def build_summary_payload(state: InsightEngineState) -> dict[str, Any]:
         "react_actions": {
             "analyze_insights": load_react_actions(state.artifacts.get("analysis_result")),
         },
-        "final_quality_result": state.final_quality_result,
     }
 
 
@@ -193,7 +187,6 @@ def build_summary_markdown(payload: dict[str, Any]) -> str:
         "",
         f"- run_id: `{payload['run_id']}`",
         f"- final_stage: `{payload['final_stage']}`",
-        f"- quality_passed: `{payload['quality_passed']}`",
         "",
         "## Counts",
         "",
@@ -248,17 +241,6 @@ def build_summary_markdown(payload: dict[str, Any]) -> str:
         for error in payload["errors"]:
             lines.append(f"- {error.get('stage')}: {error.get('message')}")
 
-    lines.extend(
-        [
-            "",
-            "## Final Quality Hook",
-            "",
-            "```json",
-            json.dumps(payload["final_quality_result"], ensure_ascii=False, indent=2),
-            "```",
-            "",
-        ]
-    )
     return "\n".join(lines)
 
 
@@ -268,20 +250,19 @@ def build_run_artifact_markdown(payload: dict[str, Any]) -> str:
         f"# Run Artifact - {payload['target_date']}",
         "",
         "这个文件是一次日报生成任务的单文档总览。它不替代各 stage 的 JSON 原始证据，",
-        "而是把 state、graph、stage gate、hook、ReAct、report 和 final quality 串成一条可读链路。",
+        "而是把 state、graph、stage gate、hook、ReAct 和 report 串成一条可读链路。",
         "",
         "## 运行结论",
         "",
         f"- run_id: `{payload['run_id']}`",
         f"- final_stage: `{payload['final_stage']}`",
-        f"- quality_passed: `{payload['quality_passed']}`",
         f"- warnings: {len(payload.get('warnings', []))}",
         f"- errors: {len(payload.get('errors', []))}",
         "",
         "## 流程总览",
         "",
         "```text",
-        "collect_raw_items -> clean_items -> structure_events -> analyze_insights -> generate_report -> review_and_eval -> done",
+        "collect_raw_items -> clean_items -> structure_events -> analyze_insights -> generate_report -> done",
         "```",
         "",
         "## 数据规模",
@@ -358,7 +339,6 @@ def build_run_artifact_markdown(payload: dict[str, Any]) -> str:
         "chart_data",
         "title_translations",
         "report_manifest",
-        "final_quality_hook",
         "pipeline_summary",
         "pipeline_summary_json",
     ]:
@@ -378,12 +358,6 @@ def build_run_artifact_markdown(payload: dict[str, Any]) -> str:
 
     lines.extend(
         [
-            "",
-            "## Final Quality Hook",
-            "",
-            "```json",
-            json.dumps(payload["final_quality_result"], ensure_ascii=False, indent=2),
-            "```",
             "",
             "## Artifact 设计说明",
             "",
@@ -420,7 +394,6 @@ def build_run_artifact_json_payload(
             "target_date": state.target_date,
             "created_at": state.created_at,
             "final_stage": state.current_stage,
-            "quality_passed": state.final_quality_result.get("passed"),
         },
         "workflow": [
             "collect_raw_items",
@@ -428,7 +401,6 @@ def build_run_artifact_json_payload(
             "structure_events",
             "analyze_insights",
             "generate_report",
-            "review_and_eval",
             "done",
         ],
         "counts": summary_payload.get("counts", {}),
@@ -441,7 +413,6 @@ def build_run_artifact_json_payload(
         "react_actions": summary_payload.get("react_actions", {}),
         "top_events": summary_payload.get("top_events", []),
         "global_top_events": summary_payload.get("global_top_events", []),
-        "final_quality_result": state.final_quality_result,
         "state": state.to_dict(),
         "artifact_manifest": build_artifact_manifest(state.artifacts, artifact_contents),
         "artifact_contents": artifact_contents,
@@ -590,7 +561,6 @@ def artifacts_for_stage(
             "report_manifest",
             "state_snapshot:generate_report",
         ],
-        "review_and_eval": ["prompt:review_and_eval", "final_quality_hook", "state_snapshot:review_and_eval"],
     }
     prefixes = stage_prefixes.get(stage_name, [stage_name])
     allowed_keys = set(artifact_keys)

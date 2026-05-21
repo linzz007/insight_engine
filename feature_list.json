@@ -59,13 +59,16 @@
     },
     {
       "id": "F006",
-      "name": "Runtime stage gate",
+      "name": "Runtime stage gate + Hook slot system",
       "priority": "P0",
       "status": "done",
       "acceptance": [
         "每个 stage 后检查最低产物合格性",
         "不合格时按策略重跑",
-        "gate 结果写入 state 和 pipeline summary"
+        "gate 结果写入 state 和 pipeline summary",
+        "StageHooks 插槽系统支持注册 before/after 监听器",
+        "linter 作为 after-stage 监听器挂载在 hook 插槽上",
+        "prompt 快照、trace 记录、state 快照通过 hook 插槽自动触发"
       ]
     },
     {

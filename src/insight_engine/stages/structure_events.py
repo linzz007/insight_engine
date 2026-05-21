@@ -58,7 +58,7 @@ from typing import Any
 from insight_engine.harness.artifacts import ensure_run_dir, write_json_artifact
 from insight_engine.harness.hooks.after_llm_call import parse_json_output
 from insight_engine.harness.llm_client import LLMClientError, OpenAICompatibleChatClient
-from insight_engine.harness.skill_loader import render_skill_context
+from insight_engine.harness.prompt_builder import build_retry_feedback
 from insight_engine.harness.state import (
     STRUCTURED_EVENT_AI_AREAS,
     STRUCTURED_EVENT_FIELD_SPEC,
@@ -86,24 +86,39 @@ def structure_events(state: InsightEngineState) -> InsightEngineState:
     ai_items = [item for item in state.ai_cleaned_items if item.get("should_analyze_ai")]
 
     llm_runs: list[dict[str, Any]] = []
-    global_events = _structure_scope(
-        state=state,
-        scope="global",
-        items=global_items,
-        client=client,
-        use_llm=use_llm,
-        require_llm=require_llm,
-        llm_runs=llm_runs,
-    )
-    ai_events = _structure_scope(
-        state=state,
-        scope="ai",
-        items=ai_items,
-        client=client,
-        use_llm=use_llm,
-        require_llm=require_llm,
-        llm_runs=llm_runs,
-    )
+    structured_errors: list[str] = []
+
+    def _run_scope(scope: str, items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """执行单个 scope 的结构化抽取，失败时先走 fallback 而非直接崩溃。"""
+        try:
+            return _structure_scope(
+                state=state, scope=scope, items=items,
+                client=client, use_llm=use_llm, require_llm=require_llm,
+                llm_runs=llm_runs,
+            )
+        except RuntimeError as exc:
+            # require_llm 模式下 LLM 失败：记录错误后自动降级到 fallback
+            message = f"{scope} scope LLM 调用失败，已自动降级为规则 fallback：{exc}"
+            state.add_warning("structure_events", message)
+            structured_errors.append(message)
+            llm_runs.append({
+                "scope": scope, "status": "require_llm_fallback",
+                "error": repr(exc),
+            })
+            return _fallback_events(scope=scope, items=items)
+        except Exception as exc:
+            # 其他异常：同样降级
+            message = f"{scope} scope 结构化异常，已降级为规则 fallback：{exc!r}"
+            state.add_warning("structure_events", message)
+            structured_errors.append(message)
+            llm_runs.append({
+                "scope": scope, "status": "unexpected_error_fallback",
+                "error": repr(exc),
+            })
+            return _fallback_events(scope=scope, items=items)
+
+    global_events = _run_scope("global", global_items)
+    ai_events = _run_scope("ai", ai_items)
 
     state.global_structured_events = global_events
     state.ai_structured_events = ai_events
@@ -154,7 +169,7 @@ def _structure_scope(
         return []
 
     prompt_items = _build_prompt_items(items)
-    prompt_text = _build_structure_prompt(scope=scope, items=prompt_items)
+    prompt_text = _build_structure_prompt(scope=scope, items=prompt_items, state=state)
 
     if client is None and not use_llm:
         llm_runs.append({"scope": scope, "status": "fallback_llm_disabled"})
@@ -301,9 +316,19 @@ def _build_prompt_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     ]
 
 
-def _build_structure_prompt(scope: str, items: list[dict[str, Any]]) -> str:
-    """构造结构化抽取的完整 prompt，包含约束、Skill、输出示例和输入数据。"""
+def _build_structure_prompt(
+    scope: str,
+    items: list[dict[str, Any]],
+    state: InsightEngineState | None = None,
+) -> str:
+    """构造结构化抽取的完整 prompt，包含约束、重试反馈、输出示例和输入数据。"""
     allowed_areas = sorted(AI_AREAS if scope == "ai" else GLOBAL_AREAS)
+
+    # 重试反馈：告诉 LLM 上一次为什么被 linter 拦截
+    retry_feedback = ""
+    if state is not None:
+        retry_feedback = build_retry_feedback(state, "structure_events")
+
     return "\n".join(
         [
             f"# 任务：将 {scope} cleaned_items 结构化为事件 JSON",
@@ -311,6 +336,7 @@ def _build_structure_prompt(scope: str, items: list[dict[str, Any]]) -> str:
             "你会收到一组 cleaned_items。请把每条值得分析的 item 转成一个 structured_event。",
             "当前版本不要求合并多条新闻；默认一条 item 对应一条 event。",
             "",
+            retry_feedback,
             "## 约束",
             "- 只能输出 JSON object，不要输出 Markdown。",
             "- 顶层必须是 `{ \"events\": [...] }`。",
@@ -320,9 +346,6 @@ def _build_structure_prompt(scope: str, items: list[dict[str, Any]]) -> str:
             "- `hotness_score` 必须是 0 到 100 的整数。",
             "- `importance_level` 只能是 `high`、`medium`、`low`。",
             f"- `industry_area` 只能从这些值中选择：{', '.join(allowed_areas)}。",
-            "",
-            "## 本阶段 Skill",
-            render_skill_context("structure_events"),
             "",
             "## 每个 event 必须包含字段",
             json.dumps(STRUCTURED_EVENT_REQUIRED_FIELDS, ensure_ascii=False),

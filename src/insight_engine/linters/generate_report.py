@@ -1,4 +1,9 @@
-"""Linter for generate_report stage."""
+"""generate_report stage 的运行时产物检查。
+
+这个文件检查 Stage 5 是否真的生成了可交付报告和图表产物。它同时检查文件是否存在、
+Markdown 章节是否齐全、HTML 看板结构是否存在、chart_data 是否能支撑页面展示，
+以及标题翻译是否达到当前严格要求。
+"""
 
 from __future__ import annotations
 
@@ -11,7 +16,14 @@ from insight_engine.linters.common import lint_result
 
 
 def lint(state: InsightEngineState) -> dict[str, Any]:
-    """检查 Stage 5 是否生成 Markdown、HTML 和图表产物。"""
+    """检查 Stage 5 的报告、HTML、图表和 chart_data 是否可交付。
+
+    这个函数读取 `state.report_paths` / `state.artifacts` 中登记的产物路径，并验证：
+    - Markdown、HTML 报告、charts.html、chart_data.json 是否存在。
+    - Markdown 是否包含 `REPORT_REQUIRED_HEADINGS` 的全部章节。
+    - HTML 是否包含中文标题、侧边导航、暗色样式和至少 4 个饼图。
+    - chart_data 是否包含 KPI、饼图、Top AI 事件和有效标题翻译。
+    """
     issues = []
     report_path = state.report_paths.get("report") or state.artifacts.get("report")
     html_path = state.report_paths.get("report_html") or state.artifacts.get("report_html")
@@ -46,6 +58,16 @@ def lint(state: InsightEngineState) -> dict[str, Any]:
     missing_headings = [heading for heading in REPORT_REQUIRED_HEADINGS if heading not in report_text]
     if missing_headings:
         issues.append(f"报告缺少章节：{missing_headings}")
+
+    # Schema 章节内容检查
+    missing_schema_tables = _check_schema_tables(report_text)
+    if missing_schema_tables:
+        issues.append(f"报告 Schema 章节缺失字段合同表格：{missing_schema_tables}")
+
+    if "schema-table" not in html_text:
+        issues.append("HTML 报告缺少 Schema 字段合同表格")
+    if 'href="#schema"' not in html_text:
+        issues.append("HTML 报告侧边导航缺少字段合同链接")
 
     pie_count = html_text.count('data-chart-type="pie"')
     if "今日 AI 与全球热点洞察" not in html_text:
@@ -114,8 +136,30 @@ def lint(state: InsightEngineState) -> dict[str, Any]:
 
 
 def _has_cjk(value: str) -> bool:
+    """判断字符串是否包含中文字符，用于验证中文标题翻译。"""
     return any("\u4e00" <= char <= "\u9fff" for char in value)
 
 
 def _looks_english(value: str) -> bool:
+    """粗略判断标题是否仍是英文，用于发现“中文标题等于英文原题”的情况。"""
     return bool(value) and not _has_cjk(value)
+
+
+def _check_schema_tables(report_text: str) -> list[str]:
+    """检查报告是否包含全部 5 个字段合同表格。
+
+    通过关键字段名确认每个合同表格都存在于 Markdown 报告中。
+    返回缺失的合同名称列表。
+    """
+    checks = {
+        "Raw Item": ["source_id", "source_scope", "retrieved_at"],
+        "Cleaned Item": ["clean_text", "quality_score", "should_analyze_ai"],
+        "Structured Event": ["hotness_score", "industry_area", "key_entities"],
+        "Analysis Result": ["trend_judgment", "risk_or_opportunity_notes", "summary_reason"],
+        "Report Paths": ["report_html", "chart_data", "manifest"],
+    }
+    missing = []
+    for name, keywords in checks.items():
+        if not all(kw in report_text for kw in keywords):
+            missing.append(name)
+    return missing

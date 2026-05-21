@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>今日 AI 与全球热点洞察 - 2026-05-21</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f8fafc;
+      --muted: #98a2b3;
+      --line: rgba(148, 163, 184, .2);
+      --panel: #111827;
+      --panel-2: #0f172a;
+      --surface: #070b12;
+      --surface-2: #0b111c;
+      --accent: #38bdf8;
+      --accent-2: #22c55e;
+      --risk: #fb7185;
+      --opportunity: #34d399;
+      --warm: #f59e0b;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, .12), transparent 34%),
+        linear-gradient(180deg, var(--surface), #020617 72%);
+      line-height: 1.58;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .app-shell {
+      display: grid;
+      grid-template-columns: 246px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(7, 11, 18, .86);
+      backdrop-filter: blur(18px);
+    }
+    .brand { font-size: 14px; color: var(--muted); margin-bottom: 18px; }
+    .brand strong { display: block; color: var(--ink); font-size: 18px; margin-bottom: 4px; }
+    .nav { display: grid; gap: 8px; margin-top: 18px; }
+    .nav a {
+      display: block;
+      padding: 9px 10px;
+      border-radius: 8px;
+      color: #cbd5e1;
+      border: 1px solid transparent;
+      font-size: 13px;
+    }
+    .nav a:hover { background: rgba(148, 163, 184, .1); border-color: var(--line); text-decoration: none; }
+    .side-meta { color: var(--muted); font-size: 12px; margin-top: 18px; word-break: break-all; }
+    .content { width: min(1120px, calc(100vw - 246px)); margin: 0 auto; padding: 28px; }
+    .hero {
+      padding: 30px 0 22px;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow { color: var(--accent-2); font-weight: 750; font-size: 13px; }
+    h1 { margin: 8px 0 12px; font-size: 38px; line-height: 1.12; letter-spacing: 0; }
+    h2 { margin: 0 0 14px; font-size: 20px; letter-spacing: 0; }
+    h3 { margin: 0 0 8px; font-size: 16px; letter-spacing: 0; }
+    .lead { margin: 0; color: #dbeafe; font-size: 17px; max-width: 850px; }
+    .reason { border-left: 3px solid var(--accent-2); padding-left: 10px; color: #cbd5e1; font-size: 13px; margin-top: 10px; }
+    .meta { color: var(--muted); font-size: 13px; word-break: break-all; }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+    .button { border: 1px solid var(--line); background: #0b1220; border-radius: 8px; padding: 9px 12px; font-size: 13px; color: var(--ink); }
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 22px 0; }
+    .kpi { background: linear-gradient(180deg, #111827, #0b1220); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-height: 104px; }
+    .kpi .value { font-size: 30px; font-weight: 760; }
+    .kpi .label { color: var(--ink); font-size: 14px; font-weight: 700; }
+    .kpi .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+    .section { background: rgba(17, 24, 39, .9); border: 1px solid var(--line); border-radius: 8px; padding: 18px; margin-bottom: 18px; scroll-margin-top: 24px; }
+    .pie-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .pie-card { border: 1px solid var(--line); border-radius: 8px; padding: 14px; background: #0b1220; }
+    .pie-card svg { width: 100%; max-width: 190px; display: block; margin: 0 auto; }
+    .legend { display: grid; gap: 6px; margin-top: 10px; font-size: 12px; }
+    .legend-row { display: grid; grid-template-columns: 10px 1fr auto; gap: 7px; align-items: center; }
+    .swatch { width: 10px; height: 10px; border-radius: 2px; }
+    .event { border-top: 1px solid var(--line); padding: 14px 0; }
+    .event:first-of-type { border-top: 0; padding-top: 0; }
+    .event-meta { display: flex; gap: 8px; flex-wrap: wrap; color: var(--muted); font-size: 12px; margin: 8px 0; }
+    .pill { border: 1px solid var(--line); border-radius: 999px; padding: 2px 8px; background: #0b1220; }
+    .title-zh { font-size: 18px; color: #f8fafc; }
+    .title-en { color: #94a3b8; font-size: 13px; margin: 6px 0 0; }
+    .keyword-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+    .keyword { color: #bae6fd; background: rgba(56, 189, 248, .09); border-color: rgba(56, 189, 248, .24); }
+    .rank { color: var(--accent); font-weight: 800; margin-right: 6px; }
+    .trend-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .trend { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #0b1220; min-height: 128px; }
+    .matrix { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .matrix-cell { border: 1px solid var(--line); border-radius: 8px; padding: 12px; background: #0b1220; min-height: 130px; }
+    .matrix-cell.risk { border-left: 4px solid var(--risk); }
+    .matrix-cell.opportunity { border-left: 4px solid var(--opportunity); }
+    .note { color: #cbd5e1; font-size: 13px; margin: 8px 0 0; }
+    .appendix { font-size: 13px; color: #cbd5e1; }
+    .appendix-row { border-top: 1px solid var(--line); padding: 8px 0; }
+    .schema-table { margin-bottom: 22px; }
+    .schema-table h3 { color: var(--accent-2); font-size: 15px; margin: 0 0 6px; }
+    .schema-table p { color: var(--muted); font-size: 13px; margin: 0 0 10px; }
+    .schema-table table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .schema-table th, .schema-table td { border: 1px solid var(--line); padding: 7px 8px; text-align: left; }
+    .schema-table th { background: #0b1220; color: #e2e8f0; font-weight: 700; }
+    .schema-table td code { color: var(--accent); background: rgba(56, 189, 248, .08); padding: 1px 5px; border-radius: 3px; }
+    @media (max-width: 960px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .content { width: 100%; padding: 18px; }
+      .kpis, .pie-grid, .trend-grid, .matrix { grid-template-columns: 1fr; }
+      h1 { font-size: 30px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <strong>AI Insight</strong>
+        中文新闻洞察报告
+      </div>
+      <nav class="nav" aria-label="报告导航">
+        <a href="#overview">总览结论</a>
+        <a href="#kpis">关键指标</a>
+        <a href="#distribution">数据分布</a>
+        <a href="#ai-hotspots">AI 热点</a>
+        <a href="#global-context">全球背景</a>
+        <a href="#trends">趋势判断</a>
+        <a href="#risk-opportunity">风险机会</a>
+        <a href="#appendix">结构化附录</a>
+        <a href="#schema">字段合同</a>
+      </nav>
+      <div class="side-meta">run_id<br>1b74d90d7c294db69cfd6221ccbce0aa</div>
+    </aside>
+    <main class="content">
+      <header class="hero" id="overview">
+        <div class="eyebrow">中文新闻洞察看板</div>
+        <h1>今日 AI 与全球热点洞察 · 2026-05-21</h1>
+        <p class="lead">今日AI领域核心热点为OpenAI数学突破、AI基础设施天价交易、OpenAI IPO重启、Meta裁员置换AI投资，以及Nvidia对AI代理CPU的市场预测；全球背景以政治动荡和极化为主，圣地亚哥清真寺袭击、国会警察诉讼、IRS争议、古巴指控和报告泄露等事件持续发酵。AI趋势上，技术侧推理能力和硬件需求并进，应用侧AI代理和设计工具加速渗透，政策侧AI标签系统扩展但受全球政治干扰，资本侧投入巨大但伴随人力成本置换。风险包括计算依赖、过度承诺、裁员影响及全球地缘政治不稳定；机会则集中于科学加速、市场扩张和AI安全。</p>
+        <p class="reason">判断依据：依据事件热度和重要性：OpenAI数学问题解决（hotness=90）标志AI推理突破；Anthropic-xAI每月12.5亿美元计算交易（85）凸显基础设施需求；OpenAI IPO（85）代表资本市场信心；Meta裁员（85）显示成本置换；Nvidia 2000亿美元新市场（80）预示硬件升级。全球事件中，清真寺袭击（85）和国会警察诉讼（80）反映国内安全与政治分裂，IRS协议（80）和古巴指控（80）体现行政权力争议，报告泄露（80）破坏司法信任。stats显示AI事件18条，全球20条，政治标签主导。</p>
+        <div class="toolbar">
+          <a class="button" href="daily_ai_report.md">Markdown 报告</a>
+          <a class="button" href="file:///D:/AAAcode/code-code/agent%2B/harness/insight_engine/outputs/charts/1b74d90d7c294db69cfd6221ccbce0aa/charts.html">独立图表页</a>
+        </div>
+      </header>
+
+    <section class="kpis" id="kpis" data-section="kpi">
+      <div class="kpi">
+  <div class="label">全球热点</div>
+  <div class="value">20</div>
+  <div class="hint">未在抓取阶段过滤 AI</div>
+</div>
+<div class="kpi">
+  <div class="label">AI 事件</div>
+  <div class="value">18</div>
+  <div class="hint">AI 关键词或 AI 数据源命中</div>
+</div>
+<div class="kpi">
+  <div class="label">高重要性</div>
+  <div class="value">16</div>
+  <div class="hint">importance_level=high</div>
+</div>
+<div class="kpi">
+  <div class="label">风险/机会</div>
+  <div class="value">5</div>
+  <div class="hint">Stage 4 生成</div>
+</div>
+    </section>
+
+    <section class="section" id="distribution" data-section="pie-overview">
+      <h2>数据分布总览</h2>
+      <div class="pie-grid">
+        <div class="pie-card card" data-chart-type="pie">
+  <h3>全球 / AI 占比</h3>
+  <svg viewBox="0 0 200 200" role="img" aria-label="全球 / AI 占比">
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#edf1f7" stroke-width="58" />
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#155eef" stroke-width="58"
+    stroke-dasharray="231.49 208.34" stroke-dashoffset="-0.00" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#0f766e" stroke-width="58"
+    stroke-dasharray="208.34 231.49" stroke-dashoffset="-231.49" transform="rotate(-90 100 100)" />
+    <circle cx="100" cy="100" r="42" fill="#0b1220" />
+    <text x="100" y="96" text-anchor="middle" font-size="20" font-weight="700" fill="#f8fafc">38</text>
+    <text x="100" y="116" text-anchor="middle" font-size="11" fill="#94a3b8">总计</text>
+  </svg>
+  <div class="legend"><div class="legend-row">
+  <span class="swatch" style="background:#155eef"></span>
+  <span>全球热点</span>
+  <strong>20 / 53%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#0f766e"></span>
+  <span>AI 领域</span>
+  <strong>18 / 47%</strong>
+</div></div>
+</div>
+        <div class="pie-card card" data-chart-type="pie">
+  <h3>新闻来源占比</h3>
+  <svg viewBox="0 0 200 200" role="img" aria-label="新闻来源占比">
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#edf1f7" stroke-width="58" />
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#155eef" stroke-width="58"
+    stroke-dasharray="150.47 289.36" stroke-dashoffset="-0.00" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#0f766e" stroke-width="58"
+    stroke-dasharray="115.74 324.08" stroke-dashoffset="-150.47" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#b54708" stroke-width="58"
+    stroke-dasharray="115.74 324.08" stroke-dashoffset="-266.21" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#7a5af8" stroke-width="58"
+    stroke-dasharray="57.87 381.95" stroke-dashoffset="-381.95" transform="rotate(-90 100 100)" />
+    <circle cx="100" cy="100" r="42" fill="#0b1220" />
+    <text x="100" y="96" text-anchor="middle" font-size="20" font-weight="700" fill="#f8fafc">38</text>
+    <text x="100" y="116" text-anchor="middle" font-size="11" fill="#94a3b8">总计</text>
+  </svg>
+  <div class="legend"><div class="legend-row">
+  <span class="swatch" style="background:#155eef"></span>
+  <span>ai_techcrunch</span>
+  <strong>13 / 34%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#0f766e"></span>
+  <span>global_npr_top</span>
+  <strong>10 / 26%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#b54708"></span>
+  <span>google_news_top</span>
+  <strong>10 / 26%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#7a5af8"></span>
+  <span>ai_the_verge</span>
+  <strong>5 / 13%</strong>
+</div></div>
+</div>
+        <div class="pie-card card" data-chart-type="pie">
+  <h3>AI 事件领域占比</h3>
+  <svg viewBox="0 0 200 200" role="img" aria-label="AI 事件领域占比">
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#edf1f7" stroke-width="58" />
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#155eef" stroke-width="58"
+    stroke-dasharray="195.48 244.35" stroke-dashoffset="-0.00" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#0f766e" stroke-width="58"
+    stroke-dasharray="48.87 390.95" stroke-dashoffset="-195.48" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#b54708" stroke-width="58"
+    stroke-dasharray="48.87 390.95" stroke-dashoffset="-244.35" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#7a5af8" stroke-width="58"
+    stroke-dasharray="48.87 390.95" stroke-dashoffset="-293.22" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#c01048" stroke-width="58"
+    stroke-dasharray="48.87 390.95" stroke-dashoffset="-342.08" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#475467" stroke-width="58"
+    stroke-dasharray="24.43 415.39" stroke-dashoffset="-390.95" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#0086c9" stroke-width="58"
+    stroke-dasharray="24.43 415.39" stroke-dashoffset="-415.39" transform="rotate(-90 100 100)" />
+    <circle cx="100" cy="100" r="42" fill="#0b1220" />
+    <text x="100" y="96" text-anchor="middle" font-size="20" font-weight="700" fill="#f8fafc">18</text>
+    <text x="100" y="116" text-anchor="middle" font-size="11" fill="#94a3b8">总计</text>
+  </svg>
+  <div class="legend"><div class="legend-row">
+  <span class="swatch" style="background:#155eef"></span>
+  <span>AI 应用</span>
+  <strong>8 / 44%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#0f766e"></span>
+  <span>ai_infra</span>
+  <strong>2 / 11%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#b54708"></span>
+  <span>基础模型</span>
+  <strong>2 / 11%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#7a5af8"></span>
+  <span>资本投资</span>
+  <strong>2 / 11%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#c01048"></span>
+  <span>安全</span>
+  <strong>2 / 11%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#475467"></span>
+  <span>研究论文</span>
+  <strong>1 / 6%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#0086c9"></span>
+  <span>其他</span>
+  <strong>1 / 6%</strong>
+</div></div>
+</div>
+        <div class="pie-card card" data-chart-type="pie">
+  <h3>重要性等级占比</h3>
+  <svg viewBox="0 0 200 200" role="img" aria-label="重要性等级占比">
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#edf1f7" stroke-width="58" />
+    <circle cx="100" cy="100" r="70" fill="none" stroke="#155eef" stroke-width="58"
+    stroke-dasharray="219.91 219.91" stroke-dashoffset="-0.00" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#0f766e" stroke-width="58"
+    stroke-dasharray="185.19 254.63" stroke-dashoffset="-219.91" transform="rotate(-90 100 100)" /><circle cx="100" cy="100" r="70" fill="none" stroke="#b54708" stroke-width="58"
+    stroke-dasharray="34.72 405.10" stroke-dashoffset="-405.10" transform="rotate(-90 100 100)" />
+    <circle cx="100" cy="100" r="42" fill="#0b1220" />
+    <text x="100" y="96" text-anchor="middle" font-size="20" font-weight="700" fill="#f8fafc">38</text>
+    <text x="100" y="116" text-anchor="middle" font-size="11" fill="#94a3b8">总计</text>
+  </svg>
+  <div class="legend"><div class="legend-row">
+  <span class="swatch" style="background:#155eef"></span>
+  <span>中重要性</span>
+  <strong>19 / 50%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#0f766e"></span>
+  <span>高重要性</span>
+  <strong>16 / 42%</strong>
+</div><div class="legend-row">
+  <span class="swatch" style="background:#b54708"></span>
+  <span>低重要性</span>
+  <strong>3 / 8%</strong>
+</div></div>
+</div>
+      </div>
+    </section>
+
+    <section class="section" id="ai-hotspots">
+      <h2>今日 AI 领域主要热点</h2>
+      <article class="event">
+  <h3 class="title-zh"><span class="rank">#1</span>OpenAI声称解决了一个80年历史的数学难题——这次是真的</h3>
+  <p class="title-en">英文原题：OpenAI claims it solved an 80-year-old math problem — for real this time</p>
+  <div class="event-meta">
+    <span class="pill">event_ai_5</span>
+    <span class="pill">研究论文</span>
+    <span class="pill">热度 90</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">研究论文</span><span class="pill keyword">ai</span><span class="pill keyword">openai</span><span class="pill keyword">ai_techcrunch</span></div>
+  <p>OpenAI claims its reasoning model disproved a geometry conjecture unsolved since 1946 — and this time, the mathematicians who exposed its last embarrassing claim are backing it up.</p>
+  <p class="reason">该事件 hotness_score=90，importance_level=high，且代表AI推理能力的里程碑式突破。</p>
+  <p><a href="https://techcrunch.com/2026/05/20/openai-claims-it-solved-an-80-year-old-math-problem-for-real-this-time/">查看来源</a></p>
+</article>
+<article class="event">
+  <h3 class="title-zh"><span class="rank">#2</span>Anthropic将每月向xAI支付12.5亿美元用于计算</h3>
+  <p class="title-en">英文原题：Anthropic will pay xAI $1.25B per month for compute</p>
+  <div class="event-meta">
+    <span class="pill">event_ai_4</span>
+    <span class="pill">ai_infra</span>
+    <span class="pill">热度 85</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">ai_infra</span><span class="pill keyword">ai</span><span class="pill keyword">anthropic</span><span class="pill keyword">ai_techcrunch</span></div>
+  <p>Elon Musk&#x27;s xAI surprised the AI world when it made a deal to sell compute to Anthropic. Now we know how much it&#x27;s worth.</p>
+  <p class="reason">该事件 hotness_score=85，importance_level=high，凸显AI计算资源的巨大需求和跨公司合作趋势。</p>
+  <p><a href="https://techcrunch.com/2026/05/20/anthropic-will-pay-xai-1-25-billion-per-month-for-compute/">查看来源</a></p>
+</article>
+<article class="event">
+  <h3 class="title-zh"><span class="rank">#3</span>OpenAI加速推进可能于9月进行的IPO</h3>
+  <p class="title-en">英文原题：OpenAI barrels toward IPO that may happen in September</p>
+  <div class="event-meta">
+    <span class="pill">event_ai_7</span>
+    <span class="pill">资本投资</span>
+    <span class="pill">热度 85</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">资本投资</span><span class="pill keyword">ai</span><span class="pill keyword">lawsuit</span><span class="pill keyword">openai</span><span class="pill keyword">ai_techcrunch</span></div>
+  <p>A day after Elon Musk lost his lawsuit that threatened OpenAI&#x27;s structure, leadership, and finances, OpenAI is reportedly back to prepping for its IPO.</p>
+  <p class="reason">该事件 hotness_score=85，importance_level=high，代表AI行业资本市场重大信号。</p>
+  <p><a href="https://techcrunch.com/2026/05/20/openai-barrels-toward-ipo-that-may-happen-in-september/">查看来源</a></p>
+</article>
+<article class="event">
+  <h3 class="title-zh"><span class="rank">#4</span>Meta裁员数千人以抵消AI投资</h3>
+  <p class="title-en">英文原题：Meta lays off thousands of employees to offset AI investments</p>
+  <div class="event-meta">
+    <span class="pill">event_ai_14</span>
+    <span class="pill">其他</span>
+    <span class="pill">热度 85</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">其他</span><span class="pill keyword">ai</span><span class="pill keyword">invest</span><span class="pill keyword">ai_the_verge</span></div>
+  <p>Meta has reportedly notified thousands of employees that they&#x27;ve been laid off as the company attempts to compensate for its hefty AI investments.</p>
+  <p class="reason">该事件 hotness_score=85，importance_level=high，反映AI投资与人力的权衡。</p>
+  <p><a href="https://www.theverge.com/tech/935163/meta-layoffs-ai-investment-offset-memo">查看来源</a></p>
+</article>
+<article class="event">
+  <h3 class="title-zh"><span class="rank">#5</span>黄仁勋称他为英伟达找到了一个‘全新的’2000亿美元市场</h3>
+  <p class="title-en">英文原题：Jensen Huang says he’s found a ‘brand new’ $200B market for Nvidia</p>
+  <div class="event-meta">
+    <span class="pill">event_ai_1</span>
+    <span class="pill">ai_infra</span>
+    <span class="pill">热度 80</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">ai_infra</span><span class="pill keyword">agent</span><span class="pill keyword">ai</span><span class="pill keyword">ai_agent</span><span class="pill keyword">market</span><span class="pill keyword">nvidia</span><span class="pill keyword">ai_techcrunch</span></div>
+  <p>The next big thing for Nvidia will be CPUs for AI agents, $200 billion worth, CEO Jensen Huang predicts.</p>
+  <p class="reason">该事件 hotness_score=80，importance_level=high，预示AI硬件市场新方向。</p>
+  <p><a href="https://techcrunch.com/2026/05/20/jensen-huang-says-hes-found-a-brand-new-200b-market-for-nvidia/">查看来源</a></p>
+</article>
+    </section>
+    <section class="section" id="global-context">
+      <h2>全球热点背景</h2>
+      <article class="event">
+  <h3 class="title-zh">‘他献出了生命’：圣地亚哥清真寺袭击中遇害保安被誉英雄 - 卫报</h3>
+  <p class="title-en">英文原题：‘He sacrificed his life’: security guard killed in San Diego mosque attack hailed as hero - The Guardian</p>
+  <div class="event-meta">
+    <span class="pill">event_global_16</span>
+    <span class="pill">安全</span>
+    <span class="pill">热度 85</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">安全</span><span class="pill keyword">attack</span><span class="pill keyword">security</span><span class="pill keyword">shooting</span><span class="pill keyword">google_news_top</span></div>
+  <p>‘He sacrificed his life’: security guard killed in San Diego mosque attack hailed as hero The Guardian Mosque shooting suspects influenced by incel rage and Raúl Castro indicted: Morning Rundown NBC News San Diego mosque shooting offers a chilling echo of past killings streamed online The Washington Post The Glorification of Mass Murder The Atlantic FBI focusing on writings by teen suspects in deadly shooting at Islamic Center of San Diego fox5sandiego.com</p>
+  <p class="reason">该事件 hotness_score=85，importance_level=high，且体现国内恐怖主义威胁和极端主义意识形态影响。</p>
+  <p><a href="https://news.google.com/rss/articles/CBMijwFBVV95cUxPRGoxdW1fYjBBOTNkbHBiX3hvRzNmRUFhRmlJQkE5eVRnTVBnQ3A1MElqMHRmRnFxdWFWaUpZRVZOcl9lcGdWRW9JZEh5em5manFaUUVzNkFFVU0zWFJJNWpveFJPdjVvaWZmdC1MSDJsQmRtY09TVTVydW5zbjIyaGNqN0VPbE1YZ0xHaXVpYw?oc=5">查看来源</a></p>
+</article>
+<article class="event">
+  <h3 class="title-zh">保卫国会大厦免受暴徒袭击的警官起诉阻止基金支出 - NPR</h3>
+  <p class="title-en">英文原题：Officers who defended Capitol from rioters sue to block payouts from fund - NPR</p>
+  <div class="event-meta">
+    <span class="pill">event_global_11</span>
+    <span class="pill">政治</span>
+    <span class="pill">热度 80</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">政治</span><span class="pill keyword">election</span><span class="pill keyword">iran</span><span class="pill keyword">politics</span><span class="pill keyword">trump</span><span class="pill keyword">war</span><span class="pill keyword">google_news_top</span></div>
+  <p>Officers who defended Capitol from rioters sue to block payouts from fund NPR ‘This is long overdue’: Jan. 6 rioters and election deniers celebrate Trump’s $1.8 billion compensation fund CNN Key Votes Loom on Iran War, Trump ‘Weaponization’ Fund Bloomberg.com Trump’s allies are already lining up to apply to his $1.8 billion fund The Washington Post &#x27;I&#x27;m not greedy&#x27;: January 6 rioters and Trump allies eye $1.8 billion &#x27;weaponization&#x27; fund Reuters</p>
+  <p class="reason">该事件 hotness_score=80，importance_level=high，反映1月6日事件后政治分裂和资金争议。</p>
+  <p><a href="https://news.google.com/rss/articles/CBMiggFBVV95cUxQSVBDX0tBVlpMbHhyYW12bmtGY2pTaEp1WnVpTGFNTDhqUmtORmpEZm95engzTi1Nd3lVamprS3B5ZGpuZVA2ZHBwanVpLXc4RFRzUGplQ0lpWHJ3M21LbW93YTRkbzVOelBNT1dyN2JzU0JjU0J5VmxEcGx0TkVHV1Jn?oc=5">查看来源</a></p>
+</article>
+<article class="event">
+  <h3 class="title-zh">特朗普与IRS的和解协议如何可能阻止对其本人、家人及其企业的税务审计 - BBC</h3>
+  <p class="title-en">英文原题：How Trump&#x27;s IRS settlement could block tax audits of him, his family and their businesses - BBC</p>
+  <div class="event-meta">
+    <span class="pill">event_global_12</span>
+    <span class="pill">政治</span>
+    <span class="pill">热度 80</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">政治</span><span class="pill keyword">politics</span><span class="pill keyword">trump</span><span class="pill keyword">google_news_top</span></div>
+  <p>How Trump&#x27;s IRS settlement could block tax audits of him, his family and their businesses BBC Opinion | Trump Is Giving ‘The Fix Was In’ New Meaning The New York Times What to Know About the Trump Administration Ending Tax Audits of Trump WSJ Is Trump&#x27;s $1.7+ billion &quot;anti-weaponization fund&quot; legal? Experts weigh in. CBS News Chuck Grassley defends Trump&#x27;s $1.8 billion &#x27;anti-weaponization&#x27; fund The Des Moines Register</p>
+  <p class="reason">该事件 hotness_score=80，importance_level=high，凸显行政权力与法律公平性问题。</p>
+  <p><a href="https://news.google.com/rss/articles/CBMiWkFVX3lxTE05UUU3T2g3WHpYVnRmS09SNTdGLWdHal9BTldKRzJlZGNMeVQ4MGRZVmlTcEFnVlJzeDB6d050cUMwMHc2Xzg1QXRzRHd2clNuR01HbEZ3NktxQQ?oc=5">查看来源</a></p>
+</article>
+<article class="event">
+  <h3 class="title-zh">司法部起诉劳尔·卡斯特罗，特朗普加强对古巴施压 - 纽约时报</h3>
+  <p class="title-en">英文原题：Justice Dept. Charges Raúl Castro as Trump Escalates Pressure Campaign Against Cuba - The New York Times</p>
+  <div class="event-meta">
+    <span class="pill">event_global_13</span>
+    <span class="pill">政治</span>
+    <span class="pill">热度 80</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">政治</span><span class="pill keyword">politics</span><span class="pill keyword">president</span><span class="pill keyword">trump</span><span class="pill keyword">google_news_top</span></div>
+  <p>Justice Dept. Charges Raúl Castro as Trump Escalates Pressure Campaign Against Cuba The New York Times China says US should stop &#x27;threats&#x27; against Cuba after ex-leader charged BBC Why the U.S. Just Indicted Cuba’s Former President The New York Times AP Was There when Cuban fighter jets shot down two exile planes from Miami AP News Castro charges fuel debate over military action in Cuba The Hill</p>
+  <p class="reason">该事件 hotness_score=80，importance_level=high，涉及国际紧张局势升级。</p>
+  <p><a href="https://news.google.com/rss/articles/CBMif0FVX3lxTE5qRW9qWThnTVQ5TTJhdGdTcXItQ0xyYlZGOHZwOWZtX0hkQzhQbXB2aC0yX1FJcWlvUnNpbk12VmZZcHBiY1BDVENINnk3UV9mQVEzSnUxTGZ0a3FwbHpoc1J3WlQxV2p4UVZoM1cxN0tyWUxPcmlBaDhRSmFsTlE?oc=5">查看来源</a></p>
+</article>
+<article class="event">
+  <h3 class="title-zh">前检察官将未发布的杰克·史密斯报告电邮给自己，司法部指控 - NBC新闻</h3>
+  <p class="title-en">英文原题：Former prosecutor emailed herself the unreleased Jack Smith report, DOJ alleges - NBC News</p>
+  <div class="event-meta">
+    <span class="pill">event_global_19</span>
+    <span class="pill">政治</span>
+    <span class="pill">热度 80</span>
+  </div>
+  <div class="keyword-row"><span class="pill keyword">政治</span><span class="pill keyword">invest</span><span class="pill keyword">politics</span><span class="pill keyword">trump</span><span class="pill keyword">google_news_top</span></div>
+  <p>Former prosecutor emailed herself the unreleased Jack Smith report, DOJ alleges NBC News Prosecutor charged with stealing Jack Smith’s sealed report on Trump classified-documents case The Washington Post Former federal prosecutor indicted for stealing copies of unreleased Jack Smith report Politico Florida prosecutor charged with emailing herself the most sought-after documents from Jack Smith’s Trump investigation CNN Ex-DoJ prosecutor charged with sending sealed Jack Smith Trump report to personal email The Guardian</p>
+  <p class="reason">该事件 hotness_score=80，importance_level=high，反映司法系统内部泄密风险。</p>
+  <p><a href="https://news.google.com/rss/articles/CBMiwAFBVV95cUxNR09wWGw1SV9OT004V3JjUjd4cWc3U1VTZzI2MXluQzFEOXhqMU1yQnBMREdackhhNjFZN0xtSGpkaXd4MDNQVUx1NmoxS0hOWDJGRXRpcVJWMS12REJFNXVXYkotME1ScThGdEZLQ1Z1VE5STERaQ25yaTZKcGNHVC1UX2o3RWNjWGRsWnl6NTY2RHpBVXk2d0R4Z1N4SGlqanFJTUNnZ25TYlpzUGU2dS03QU9fVHBxRlIxbTF4anI?oc=5">查看来源</a></p>
+</article>
+    </section>
+    <section class="section" id="trends">
+      <h2>趋势判断</h2>
+      <div class="trend-grid"><div class="trend">
+  <h3>技术方向</h3>
+  <p>AI推理能力取得突破性进展（OpenAI解决80年数学问题），同时AI代理对专用CPU的需求催生新硬件市场（Nvidia预测2000亿美元）。</p>
+  <p class="reason">基于OpenAI数学突破（event_ai_5，hotness=90）和Nvidia新市场预测（event_ai_1，hotness=80），显示技术侧双线推进：模型能力提升与硬件需求升级。</p>
+</div>
+<div class="trend">
+  <h3>应用方向</h3>
+  <p>AI深度渗透设计工具（Figma AI助手）、搜索引擎（AI搜索初创公司爆发）、视频创作（YouTube Shorts AI重混），以及AI代理平台（Google信息代理）加速应用落地。</p>
+  <p class="reason">基于Google IO设计工具（event_ai_11）、Figma AI助手（event_ai_10）、AI搜索初创（event_ai_8）、YouTube重混（event_ai_15）等事件，应用侧覆盖设计、搜索、视频、代理等多个场景。</p>
+</div>
+<div class="trend">
+  <h3>政策方向</h3>
+  <p>AI内容标签系统（SynthID、C2PA）扩展，但全球政治动荡（美国国内极化和国际紧张）分散政策注意力，可能延缓AI监管统一进程。</p>
+  <p class="reason">基于AI标签系统扩展（event_ai_17）和全球政治背景（全球事件中13条政治标签），政策侧虽有技术进展但被地缘政治分散关注。</p>
+</div>
+<div class="trend">
+  <h3>资本方向</h3>
+  <p>巨额资本涌入AI基础设施（Anthropic-xAI每月12.5亿美元计算交易），OpenAI IPO即将启动，但同时出现人力成本置换（Meta裁员以资助AI投资）。</p>
+  <p class="reason">基于Anthropic计算交易（event_ai_4）、OpenAI IPO（event_ai_7）、Meta裁员（event_ai_14）和Nvidia财报（event_ai_3），资本侧显示投资规模巨大但伴随结构调整。</p>
+</div></div>
+    </section>
+    <section class="section" id="risk-opportunity">
+      <h2>风险与机会矩阵</h2>
+      <div class="matrix"><div class="matrix-cell risk">
+  <h3>短期 · 风险</h3>
+  <p>AI基础设施依赖风险：Anthropic每月12.5亿美元计算支出显示对单一供应商（xAI）的依赖，可能面临成本上升和供应链脆弱性。</p>
+  <p class="note">理由：基于event_ai_4（高额计算交易）和event_ai_1（Nvidia市场预测），基础设施投入巨大但集中度风险高。</p>
+  <p class="meta">支撑事件：event_ai_4, event_ai_1</p>
+</div>
+<div class="matrix-cell risk">
+  <h3>短期 · 风险</h3>
+  <p>AI科学突破验证风险：OpenAI数学问题解决若无法复现，可能重演此前尴尬，损害AI可信度。</p>
+  <p class="note">理由：基于event_ai_5（OpenAI声称解决80年难题），此前有虚假声称记录，需谨慎对待。</p>
+  <p class="meta">支撑事件：event_ai_5</p>
+</div>
+<div class="matrix-cell risk">
+  <h3>中期 · 风险</h3>
+  <p>AI投资导致人力成本置换风险：Meta裁员数千人以支持AI投入，可能引发劳资矛盾和社会舆论反弹。</p>
+  <p class="note">理由：基于event_ai_14（Meta裁员），反映企业优先AI投资而削减人力。</p>
+  <p class="meta">支撑事件：event_ai_14</p>
+</div>
+<div class="matrix-cell opportunity">
+  <h3>中期 · 机会</h3>
+  <p>IPO市场机会：OpenAI IPO计划推进，若成功将为AI行业注入大量资本并提振信心。</p>
+  <p class="note">理由：基于event_ai_7（OpenAI IPO），法律障碍清除后上市在即。</p>
+  <p class="meta">支撑事件：event_ai_7</p>
+</div>
+<div class="matrix-cell opportunity">
+  <h3>中期 · 机会</h3>
+  <p>AI代理市场增长机会：Nvidia预测AI代理CPU市场达2000亿美元，显示应用侧代理化趋势将创造新生态。</p>
+  <p class="note">理由：基于event_ai_1（Nvidia新市场）和event_ai_12（Google信息代理），代理型AI应用前景广阔。</p>
+  <p class="meta">支撑事件：event_ai_1, event_ai_12</p>
+</div></div>
+    </section>
+    <section class="section" id="deep-dive">
+      <h2>重要事件深度总结</h2>
+      <article class="event">
+  <h3 class="title-zh">event_ai_5: OpenAI声称解决了一个80年历史的数学难题——这次是真的</h3>
+  <p class="title-en">英文原题：OpenAI claims it solved an 80-year-old math problem — for real this time</p>
+  <p><strong>为什么重要：</strong>该事件 hotness_score=90，importance_level=high，且代表AI推理能力的里程碑式突破。</p>
+  <p><strong>影响分析：</strong>If verified, this breakthrough demonstrates advanced AI reasoning capabilities, potentially accelerating scientific discovery and validating AI&#x27;s role in complex mathematics.</p>
+  <p><strong>风险或机会：</strong>Opportunity for AI credibility; risk of overclaim if not reproducible.</p>
+</article>
+<article class="event">
+  <h3 class="title-zh">event_ai_4: Anthropic将每月向xAI支付12.5亿美元用于计算</h3>
+  <p class="title-en">英文原题：Anthropic will pay xAI $1.25B per month for compute</p>
+  <p><strong>为什么重要：</strong>该事件 hotness_score=85，importance_level=high，凸显AI计算资源的巨大需求和跨公司合作趋势。</p>
+  <p><strong>影响分析：</strong>The $1.25B/month compute deal between Anthropic and xAI highlights the massive demand for AI compute and the strategic importance of infrastructure partnerships.</p>
+  <p><strong>风险或机会：</strong>Opportunity for compute providers; risk of dependence and cost for AI labs.</p>
+</article>
+<article class="event">
+  <h3 class="title-zh">event_ai_7: OpenAI加速推进可能于9月进行的IPO</h3>
+  <p class="title-en">英文原题：OpenAI barrels toward IPO that may happen in September</p>
+  <p><strong>为什么重要：</strong>该事件 hotness_score=85，importance_level=high，代表AI行业资本市场重大信号。</p>
+  <p><strong>影响分析：</strong>OpenAI&#x27;s IPO plans, now cleared of legal threat, could be one of the largest tech IPOs, signaling market confidence and providing capital for AI development.</p>
+  <p><strong>风险或机会：</strong>Opportunity for OpenAI and investors; risk of market volatility or regulatory scrutiny.</p>
+</article>
+<article class="event">
+  <h3 class="title-zh">event_ai_14: Meta裁员数千人以抵消AI投资</h3>
+  <p class="title-en">英文原题：Meta lays off thousands of employees to offset AI investments</p>
+  <p><strong>为什么重要：</strong>该事件 hotness_score=85，importance_level=high，反映AI投资与人力的权衡。</p>
+  <p><strong>影响分析：</strong>Meta&#x27;s layoffs to fund AI investments reflect a trade-off between human capital and AI infrastructure, potentially affecting employee morale and public perception.</p>
+  <p><strong>风险或机会：</strong>Risk for Meta&#x27;s workforce; opportunity to reallocate resources to AI.</p>
+</article>
+<article class="event">
+  <h3 class="title-zh">event_ai_1: 黄仁勋称他为英伟达找到了一个‘全新的’2000亿美元市场</h3>
+  <p class="title-en">英文原题：Jensen Huang says he’s found a ‘brand new’ $200B market for Nvidia</p>
+  <p><strong>为什么重要：</strong>该事件 hotness_score=80，importance_level=high，预示AI硬件市场新方向。</p>
+  <p><strong>影响分析：</strong>Nvidia&#x27;s CEO predicts a $200B market for AI agent CPUs, indicating a major expansion in demand for specialized hardware, which could drive Nvidia&#x27;s growth and reshape the AI infrastructure landscape.</p>
+  <p><strong>风险或机会：</strong>Opportunity for Nvidia and AI hardware suppliers; risk if market fails to materialize.</p>
+</article>
+    </section>
+    <section class="section" id="appendix">
+      <h2>结构化数据附录</h2>
+      <div class="appendix"><div class="appendix-row">
+  <strong>event_global_1</strong> · 共和党争相资助移民执法。此外，美国起诉古巴前总统
+  <br><span>英文原题：GOP races to fund immigration enforcement. And, U.S. indicts former Cuban president</span>
+  <br><span>global / global_npr_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_2</strong> · 研究人员称特朗普政府正寻找新方式惩罚科学
+  <br><span>英文原题：Researchers say the Trump administration is finding new ways to punish science</span>
+  <br><span>global / global_npr_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_3</strong> · 在爱泼斯坦‘佐罗牧场’虐待指控中，新墨西哥州启动新调查
+  <br><span>英文原题：Amid allegations of abuse on Epstein&#x27;s &#x27;Zorro Ranch,&#x27; New Mexico opens new probes</span>
+  <br><span>global / global_npr_top / 其他</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_4</strong> · 尽管特朗普治下焦虑加剧，这些摇摆选民仍未准备好支持民主党
+  <br><span>英文原题：Even as anxieties grow under Trump, these swing voters aren&#x27;t ready to back Democrats</span>
+  <br><span>global / global_npr_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_5</strong> · 新冠疫情正塑造美国人对埃博拉和汉坦病毒的反应
+  <br><span>英文原题：COVID is shaping Americans&#x27; reaction to Ebola and hantavirus</span>
+  <br><span>global / global_npr_top / health</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_6</strong> · 将草坪改造成野生动物友好花园的指南
+  <br><span>英文原题：A guide to converting your lawn into a wildlife friendly garden</span>
+  <br><span>global / global_npr_top / 其他</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_7</strong> · Spencer Pratt‘赢得互联网’，但他能成为洛杉矶市长吗？
+  <br><span>英文原题：Spencer Pratt is &#x27;winning the internet,&#x27; but can he become mayor of Los Angeles?</span>
+  <br><span>global / global_npr_top / ai</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_8</strong> · 教育部正在招聘——尽管其正被解散
+  <br><span>英文原题：The Education Department is hiring — while it&#x27;s being dismantled</span>
+  <br><span>global / global_npr_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_9</strong> · 随着洪水加剧，英国尝试新方案：海狸
+  <br><span>英文原题：As floods get worse, Britain tries a new solution: beavers</span>
+  <br><span>global / global_npr_top / 气候</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_10</strong> · TSA新‘Gold+’计划旨在增加机场私人安检
+  <br><span>英文原题：TSA&#x27;s new &#x27;Gold+&#x27; program looks to increase private security screening at airports</span>
+  <br><span>global / global_npr_top / 其他</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_11</strong> · 保卫国会大厦免受暴徒袭击的警官起诉阻止基金支出 - NPR
+  <br><span>英文原题：Officers who defended Capitol from rioters sue to block payouts from fund - NPR</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_12</strong> · 特朗普与IRS的和解协议如何可能阻止对其本人、家人及其企业的税务审计 - BBC
+  <br><span>英文原题：How Trump&#x27;s IRS settlement could block tax audits of him, his family and their businesses - BBC</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_13</strong> · 司法部起诉劳尔·卡斯特罗，特朗普加强对古巴施压 - 纽约时报
+  <br><span>英文原题：Justice Dept. Charges Raúl Castro as Trump Escalates Pressure Campaign Against Cuba - The New York Times</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_14</strong> · 以色列部长因对待船队活动人士方式遭全球谴责 - 华盛顿邮报
+  <br><span>英文原题：Israeli minister draws global rebuke over treatment of flotilla activists - The Washington Post</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_15</strong> · 宾夕法尼亚州四场摇摆众议院竞选对两党及2028年选举影响重大 - NBC新闻
+  <br><span>英文原题：Four swing House races in Pennsylvania loom large for both parties — and for 2028, too - NBC News</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_16</strong> · ‘他献出了生命’：圣地亚哥清真寺袭击中遇害保安被誉英雄 - 卫报
+  <br><span>英文原题：‘He sacrificed his life’: security guard killed in San Diego mosque attack hailed as hero - The Guardian</span>
+  <br><span>global / google_news_top / 安全</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_17</strong> · 科罗拉多州民主党谴责州长贾里德·波利斯对蒂娜·彼得斯的减刑 - 科罗拉多公共电台
+  <br><span>英文原题：Colorado Democrats censure Gov. Jared Polis over Tina Peters commutation - Colorado Public Radio</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_18</strong> · ‘我们从未如此糟糕。’宾夕法尼亚东部权衡成本上升 - 纽约时报
+  <br><span>英文原题：‘We’ve Never Been This Bad.’ Eastern Pennsylvania Weighs Rising Costs. - The New York Times</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_19</strong> · 前检察官将未发布的杰克·史密斯报告电邮给自己，司法部指控 - NBC新闻
+  <br><span>英文原题：Former prosecutor emailed herself the unreleased Jack Smith report, DOJ alleges - NBC News</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_global_20</strong> · 五角大楼官员访北京行程因美国140亿美元对台军售案存疑 - 金融时报
+  <br><span>英文原题：Pentagon official’s Beijing visit in doubt over $14bn US arms package for Taiwan - Financial Times</span>
+  <br><span>global / google_news_top / 政治</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_1</strong> · 黄仁勋称他为英伟达找到了一个‘全新的’2000亿美元市场
+  <br><span>英文原题：Jensen Huang says he’s found a ‘brand new’ $200B market for Nvidia</span>
+  <br><span>ai / ai_techcrunch / ai_infra</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_2</strong> · Anthropic表示即将迎来首个盈利季度
+  <br><span>英文原题：Anthropic says it’s about to have its first profitable quarter</span>
+  <br><span>ai / ai_techcrunch / 基础模型</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_3</strong> · 英伟达再创季度纪录，披露持有初创企业430亿美元
+  <br><span>英文原题：Nvidia posts another record quarter, reveals $43B of holdings in startups</span>
+  <br><span>ai / ai_techcrunch / 资本投资</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_4</strong> · Anthropic将每月向xAI支付12.5亿美元用于计算
+  <br><span>英文原题：Anthropic will pay xAI $1.25B per month for compute</span>
+  <br><span>ai / ai_techcrunch / ai_infra</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_5</strong> · OpenAI声称解决了一个80年历史的数学难题——这次是真的
+  <br><span>英文原题：OpenAI claims it solved an 80-year-old math problem — for real this time</span>
+  <br><span>ai / ai_techcrunch / 研究论文</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_6</strong> · 吴恩达支持的初创公司IrisGo欲成为你未曾意识到的AI桌面伙伴
+  <br><span>英文原题：IrisGo, a startup backed by Andrew Ng, looks to become the AI desktop buddy you never knew you needed</span>
+  <br><span>ai / ai_techcrunch / AI 应用</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_7</strong> · OpenAI加速推进可能于9月进行的IPO
+  <br><span>英文原题：OpenAI barrels toward IPO that may happen in September</span>
+  <br><span>ai / ai_techcrunch / 资本投资</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_8</strong> · AI搜索初创公司正在爆发
+  <br><span>英文原题：AI search startups are blowing up</span>
+  <br><span>ai / ai_techcrunch / AI 应用</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_9</strong> · Stability AI发布新音频模型，可创作6分钟歌曲
+  <br><span>英文原题：Stability AI releases a new audio model that can create 6-minute songs</span>
+  <br><span>ai / ai_techcrunch / 基础模型</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_10</strong> · Figma在其协作画布中加入AI助手
+  <br><span>英文原题：Figma adds an AI assistant to its collaborative canvas</span>
+  <br><span>ai / ai_techcrunch / AI 应用</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_11</strong> · 谷歌在IO 2026上宣称自己成为AI设计领域的竞争者
+  <br><span>英文原题：Google just declared itself a contender in AI design at IO 2026</span>
+  <br><span>ai / ai_techcrunch / AI 应用</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_12</strong> · 如何使用谷歌新AI代理超越标准搜索
+  <br><span>英文原题：How to use Google’s new AI agents to go beyond your standard searches</span>
+  <br><span>ai / ai_techcrunch / AI 应用</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_13</strong> · 从少年黑客到铁穹研究员，这位创始人融资2800万美元对抗AI钓鱼
+  <br><span>英文原题：From teen hacker to Iron Dome researcher, this founder raised $28M to fight AI phishing</span>
+  <br><span>ai / ai_techcrunch / 安全</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_14</strong> · Meta裁员数千人以抵消AI投资
+  <br><span>英文原题：Meta lays off thousands of employees to offset AI investments</span>
+  <br><span>ai / ai_the_verge / 其他</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_15</strong> · 你现在可以用AI混剪他人的YouTube Shorts
+  <br><span>英文原题：You can now remix other people’s YouTube Shorts with AI</span>
+  <br><span>ai / ai_the_verge / AI 应用</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_16</strong> · 谷歌搜索的AI演进包含更多广告
+  <br><span>英文原题：Google Search’s AI evolution includes more ads</span>
+  <br><span>ai / ai_the_verge / AI 应用</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_17</strong> · AI标注系统迎来成败关头
+  <br><span>英文原题：It’s make or break time for AI labeling systems</span>
+  <br><span>ai / ai_the_verge / 安全</span>
+</div>
+<div class="appendix-row">
+  <strong>event_ai_18</strong> · 如果谷歌不能使AI代理有用，也许没人能做到
+  <br><span>英文原题：If Google can’t make AI agents useful, maybe no one can</span>
+  <br><span>ai / ai_the_verge / AI 应用</span>
+</div></div>
+    </section>
+    <section class="section" id="quality">
+      <h2>质量评估摘要</h2>
+      <p class="note">质量检查由 <code>generate_report</code> stage gate 自动完成。Stage 5 只在标题翻译环节调用 LLM，页面渲染仍使用确定性模板。</p>
+    </section>
+    <section class="section" id="schema">
+      <h2>数据字段合同（Schema）</h2>
+      <p class="note">本系统通过 5 个跨阶段字段合同约束数据质量。每个 stage 负责产出对应字段，gate/linter 负责校验字段，下游 stage 按合同消费字段。</p>
+      <div class="schema-table"><h3>Raw Item 字段合同（Stage 1 产出）</h3><p>原始数据抓取后每个 item 必须满足的结构。global 和 AI 两条数据线共用此合同。</p><table><thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>用途说明</th></tr></thead><tbody><tr><td><code>source_id</code></td><td>str</td><td><strong>是</strong></td><td>数据源 ID。</td></tr><tr><td><code>source_scope</code></td><td>str</td><td><strong>是</strong></td><td>global 或 ai 数据线。</td></tr><tr><td><code>source_type</code></td><td>str</td><td><strong>是</strong></td><td>media、social、research 等来源类型。</td></tr><tr><td><code>title</code></td><td>str</td><td><strong>是</strong></td><td>原始新闻标题。</td></tr><tr><td><code>url</code></td><td>str</td><td><strong>是</strong></td><td>原始链接。</td></tr><tr><td><code>published_at</code></td><td>str</td><td><strong>是</strong></td><td>发布时间，保持来源原始格式或 ISO 格式。</td></tr><tr><td><code>author_or_org</code></td><td>str</td><td>否</td><td>作者或机构。</td></tr><tr><td><code>summary</code></td><td>str</td><td>否</td><td>来源摘要。</td></tr><tr><td><code>raw_content</code></td><td>str</td><td>否</td><td>原始正文或摘要内容。</td></tr><tr><td><code>retrieved_at</code></td><td>str</td><td><strong>是</strong></td><td>抓取时间。</td></tr><tr><td><code>metadata</code></td><td>object</td><td>否</td><td>来源特有字段。</td></tr></tbody></table></div>
+<div class="schema-table"><h3>Cleaned Item 字段合同（Stage 2 产出）</h3><p>清洗去重后每个 item 的字段结构。新增标签、质量分、分析候选标记。</p><table><thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>用途说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>str</td><td><strong>是</strong></td><td>清洗后 item ID。</td></tr><tr><td><code>source_id</code></td><td>str</td><td><strong>是</strong></td><td>数据源 ID。</td></tr><tr><td><code>source_scope</code></td><td>str</td><td><strong>是</strong></td><td>global 或 ai 数据线。</td></tr><tr><td><code>source_type</code></td><td>str</td><td><strong>是</strong></td><td>来源类型。</td></tr><tr><td><code>title</code></td><td>str</td><td><strong>是</strong></td><td>标准化标题。</td></tr><tr><td><code>url</code></td><td>str</td><td><strong>是</strong></td><td>标准化链接。</td></tr><tr><td><code>published_at</code></td><td>str</td><td><strong>是</strong></td><td>解析后的发布时间。</td></tr><tr><td><code>published_date</code></td><td>str|null</td><td>否</td><td>发布时间日期。</td></tr><tr><td><code>recency_days</code></td><td>int|null</td><td>否</td><td>距离 target_date 的天数。</td></tr><tr><td><code>is_recent</code></td><td>bool</td><td><strong>是</strong></td><td>是否在近期窗口内。</td></tr><tr><td><code>summary</code></td><td>str</td><td><strong>是</strong></td><td>清洗后的摘要。</td></tr><tr><td><code>clean_text</code></td><td>str</td><td><strong>是</strong></td><td>后续 LLM 使用的清洁文本。</td></tr><tr><td><code>domain</code></td><td>str</td><td><strong>是</strong></td><td>粗分类领域。</td></tr><tr><td><code>topic_tags</code></td><td>list[str]</td><td><strong>是</strong></td><td>主题标签。</td></tr><tr><td><code>is_ai_related</code></td><td>bool</td><td><strong>是</strong></td><td>是否 AI 相关。</td></tr><tr><td><code>ai_match_keywords</code></td><td>list[str]</td><td><strong>是</strong></td><td>命中的 AI 关键词。</td></tr><tr><td><code>quality_score</code></td><td>float</td><td><strong>是</strong></td><td>简单质量评分。</td></tr><tr><td><code>quality_reasons</code></td><td>list[str]</td><td><strong>是</strong></td><td>质量评分理由。</td></tr><tr><td><code>should_analyze_global</code></td><td>bool</td><td><strong>是</strong></td><td>是否进入 global 分析候选。</td></tr><tr><td><code>should_analyze_ai</code></td><td>bool</td><td><strong>是</strong></td><td>是否进入 AI 分析候选。</td></tr><tr><td><code>analysis_exclusion_reasons</code></td><td>list[str]</td><td><strong>是</strong></td><td>不进入分析的原因。</td></tr><tr><td><code>raw_ref</code></td><td>str</td><td><strong>是</strong></td><td>对应 raw item 位置。</td></tr></tbody></table></div>
+<div class="schema-table"><h3>Structured Event 字段合同（Stage 3 产出）</h3><p>LLM 或 fallback 生成的每条结构化事件字段。URL 和发布时间不允许 LLM 编造。</p><table><thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>用途说明</th></tr></thead><tbody><tr><td><code>id</code></td><td>str</td><td><strong>是</strong></td><td>结构化事件 ID。</td></tr><tr><td><code>source_scope</code></td><td>str</td><td><strong>是</strong></td><td>global 或 ai 数据线。</td></tr><tr><td><code>title</code></td><td>str</td><td><strong>是</strong></td><td>事件标题。</td></tr><tr><td><code>source_name</code></td><td>str</td><td><strong>是</strong></td><td>来源名称，通常等于 source_id。</td></tr><tr><td><code>source_type</code></td><td>str</td><td><strong>是</strong></td><td>来源类型。</td></tr><tr><td><code>url</code></td><td>str</td><td><strong>是</strong></td><td>来源 URL，不允许 LLM 编造。</td></tr><tr><td><code>published_at</code></td><td>str</td><td><strong>是</strong></td><td>发布时间，不允许 LLM 编造。</td></tr><tr><td><code>industry_area</code></td><td>str</td><td><strong>是</strong></td><td>行业/议题方向。</td></tr><tr><td><code>topic_tags</code></td><td>list[str]</td><td><strong>是</strong></td><td>主题标签。</td></tr><tr><td><code>hotness_score</code></td><td>int</td><td><strong>是</strong></td><td>0-100 热度分。</td></tr><tr><td><code>importance_level</code></td><td>str</td><td><strong>是</strong></td><td>high、medium 或 low。</td></tr><tr><td><code>summary</code></td><td>str</td><td><strong>是</strong></td><td>一句话事实摘要。</td></tr><tr><td><code>key_entities</code></td><td>list[str]</td><td><strong>是</strong></td><td>关键实体。</td></tr><tr><td><code>impact_analysis</code></td><td>str</td><td><strong>是</strong></td><td>影响分析。</td></tr><tr><td><code>risk_or_opportunity</code></td><td>str</td><td><strong>是</strong></td><td>风险或机会判断。</td></tr><tr><td><code>evidence</code></td><td>object</td><td><strong>是</strong></td><td>支撑证据，必须绑定来源。</td></tr><tr><td><code>raw_ref</code></td><td>str</td><td><strong>是</strong></td><td>对应 cleaned item ID。</td></tr></tbody></table></div>
+<div class="schema-table"><h3>Analysis Result 字段合同（Stage 4 产出）</h3><p>分析阶段的输出是下游报告的输入。每个子字段有独立的类型和必填子字段约束。</p><table><thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>用途说明</th></tr></thead><tbody><tr><td><code>summary</code></td><td>str</td><td><strong>是</strong></td><td>今日整体判断，给报告开头使用。</td></tr><tr><td><code>summary_reason</code></td><td>str</td><td><strong>是</strong></td><td>整体判断的理由，用于提高 LLM 推理质量和后续审计。</td></tr><tr><td><code>global_top_events</code></td><td>list[object]</td><td><strong>是</strong></td><td>今日全球背景 Top 事件，给报告的全球热点背景章节使用。必须保留展示字段，避免下游报告丢失来源、方向、标签和热度。（子字段：id、title、url、summary、selection_reason、source_name、source_type、published_at）</td></tr><tr><td><code>top_events</code></td><td>list[object]</td><td><strong>是</strong></td><td>今日 AI 领域 Top 3-5 事件，给报告主热点和深度总结使用。必须保留展示字段，避免下游报告丢失来源、方向、标签和热度。（子字段：id、title、url、summary、selection_reason、source_name、source_type、published_at）</td></tr><tr><td><code>trend_judgment</code></td><td>object</td><td><strong>是</strong></td><td>技术、应用、政策、资本四个方向的趋势判断。（子字段：technology、application、policy、capital）</td></tr><tr><td><code>trend_reasoning</code></td><td>object</td><td><strong>是</strong></td><td>四个趋势判断分别对应的理由，不一定直接给报告展示，但用于提高准确率和审计。（子字段：technology、application、policy、capital）</td></tr><tr><td><code>risk_or_opportunity_notes</code></td><td>list[object]</td><td><strong>是</strong></td><td>风险或机会提示，必须绑定支撑事件。（子字段：area、note、reason、supporting_event_ids）</td></tr><tr><td><code>stats</code></td><td>object</td><td><strong>是</strong></td><td>统计数据，给图表和报告数据源概览使用。（子字段：total_events、global_events、ai_events）</td></tr><tr><td><code>react_mode</code></td><td>str</td><td>否</td><td>标记分析来自 llm_react 还是 fallback_rules。</td></tr></tbody></table></div>
+<div class="schema-table"><h3>Report Paths 字段合同（Stage 5 产出）</h3><p>报告生成后登记的全部产物路径。下游（页面/CLI/audit）按此合同读取文件。</p><table><thead><tr><th>字段名</th><th>类型</th><th>必填</th><th>用途说明</th></tr></thead><tbody><tr><td><code>report</code></td><td>str</td><td><strong>是</strong></td><td>Markdown 报告路径。</td></tr><tr><td><code>report_html</code></td><td>str</td><td><strong>是</strong></td><td>完整 HTML 报告路径。</td></tr><tr><td><code>chart_html</code></td><td>str</td><td><strong>是</strong></td><td>HTML 图表路径。</td></tr><tr><td><code>chart_data</code></td><td>str</td><td><strong>是</strong></td><td>图表数据 JSON 路径。</td></tr><tr><td><code>manifest</code></td><td>str</td><td><strong>是</strong></td><td>报告生成 manifest 路径。</td></tr></tbody></table></div>
+    </section>
+    </main>
+  </div>
+</body>
+</html>

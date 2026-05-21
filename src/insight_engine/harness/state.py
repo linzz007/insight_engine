@@ -192,15 +192,8 @@ REPORT_REQUIRED_HEADINGS = [
     "## 风险和机会提示",
     "## 结构化数据附录",
     "## 质量评估摘要",
+    "## 数据字段合同（Schema）",
 ]
-
-QUALITY_RESULT_FIELD_SPEC = {
-    "passed": {"type": "bool", "required": True, "purpose": "最终质量是否通过。"},
-    "score": {"type": "int|float", "required": True, "purpose": "质量评分。"},
-    "issues": {"type": "list[object]", "required": True, "purpose": "质量问题列表。"},
-    "retry_stage": {"type": "str|null", "required": True, "purpose": "建议回退的 stage。"},
-}
-
 
 def utc_now_iso() -> str:
     """返回 UTC ISO 时间字符串，方便不同运行环境保持一致。"""
@@ -214,16 +207,13 @@ class InsightEngineState:
     # target_date：这次日报对应哪一天。
     # created_at：任务创建时间。
     # current_stage：当前流程跑到哪一步。
-    # retry_count：失败后重试了几次。
+    # stage_retry_counts：每个 stage 因 gate 未通过而重试的次数。
 
     # raw_items            原始抓取数据
     # cleaned_items        清洗后数据
     # structured_events    结构化事件
     # analysis_result      分析结果
     # report_paths         报告和图表路径
-    # review_result        Reviewer 结果
-    # final_quality_result 最终质量 hook 结果
-
     # artifacts：每一步输出文件在哪里。
     # errors：致命错误。
     # warnings：非致命问题，比如某个数据源超时。
@@ -277,21 +267,6 @@ class InsightEngineState:
             "description": "Stage 5 生成的报告、图表和 manifest 路径。",
         },
     )
-    review_result: dict[str, Any] = field(
-        default_factory=dict,
-        metadata={
-            "contract": QUALITY_RESULT_FIELD_SPEC,
-            "description": "Reviewer 阶段对最终质量结果的摘要。",
-        },
-    )
-    final_quality_result: dict[str, Any] = field(
-        default_factory=dict,
-        metadata={
-            "contract": QUALITY_RESULT_FIELD_SPEC,
-            "description": "final_quality_hook 的完整质量检查结果。",
-        },
-    )
-
     artifacts: dict[str, str] = field(default_factory=dict)
     errors: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[dict[str, Any]] = field(default_factory=list)
@@ -299,7 +274,6 @@ class InsightEngineState:
     stage_gate_results: list[dict[str, Any]] = field(default_factory=list)
     stage_retry_counts: dict[str, int] = field(default_factory=dict)
     current_stage: str = "initialized"
-    retry_count: int = 0
 
     @property
     def raw_items(self) -> list[dict[str, Any]]:
@@ -386,7 +360,6 @@ class InsightEngineState:
                 "analysis_result": ANALYSIS_RESULT_FIELD_SPEC,
                 "report_paths": REPORT_PATHS_FIELD_SPEC,
                 "report_required_headings": REPORT_REQUIRED_HEADINGS,
-                "quality_result": QUALITY_RESULT_FIELD_SPEC,
             },
             "global_raw_items": self.global_raw_items,
             "global_cleaned_items": self.global_cleaned_items,
@@ -400,8 +373,6 @@ class InsightEngineState:
             "structured_events": self.structured_events,
             "analysis_result": self.analysis_result,
             "report_paths": self.report_paths,
-            "review_result": self.review_result,
-            "final_quality_result": self.final_quality_result,
             "artifacts": self.artifacts,
             "errors": self.errors,
             "warnings": self.warnings,
@@ -409,5 +380,4 @@ class InsightEngineState:
             "stage_gate_results": self.stage_gate_results,
             "stage_retry_counts": self.stage_retry_counts,
             "current_stage": self.current_stage,
-            "retry_count": self.retry_count,
         }

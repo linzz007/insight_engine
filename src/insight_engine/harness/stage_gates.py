@@ -21,7 +21,6 @@ from insight_engine.linters import (
     clean_items,
     collect_raw_items,
     generate_report,
-    review_and_eval,
     structure_events,
 )
 from insight_engine.linters.common import lint_result
@@ -33,7 +32,6 @@ LINTERS = {
     "structure_events": structure_events.lint,
     "analyze_insights": analyze_insights.lint,
     "generate_report": generate_report.lint,
-    "review_and_eval": review_and_eval.lint,
 }
 
 

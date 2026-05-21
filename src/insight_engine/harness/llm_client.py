@@ -55,7 +55,7 @@ class OpenAICompatibleChatClient:
         if not api_key:
             return None
 
-        timeout_seconds = int(os.getenv("DEEPSEEK_TIMEOUT_SECONDS", "60"))
+        timeout_seconds = int(os.getenv("DEEPSEEK_TIMEOUT_SECONDS", "120"))
         return cls(
             api_key=api_key,
             api_base=os.getenv("DEEPSEEK_API_BASE", "https://api.deepseek.com"),
@@ -67,8 +67,15 @@ class OpenAICompatibleChatClient:
         self,
         messages: list[dict[str, str]],
         temperature: float = 0.1,
+        max_retries: int | None = None,
     ) -> LLMResponse:
-        """调用 Chat Completions，并要求模型输出 JSON。"""
+        """调用 Chat Completions，并要求模型输出 JSON。
+
+        超时或网络错误时自动重试（默认 2 次），每次重试超时翻倍。
+        """
+        if max_retries is None:
+            max_retries = int(os.getenv("DEEPSEEK_MAX_RETRIES", "2"))
+
         url = f"{self.api_base}/chat/completions"
         payload = {
             "model": self.model,
@@ -76,6 +83,27 @@ class OpenAICompatibleChatClient:
             "temperature": temperature,
             "response_format": {"type": "json_object"},
         }
+
+        last_error = None
+        for attempt in range(max_retries + 1):
+            try:
+                return self._send_request(url, payload, attempt)
+            except (LLMClientError, OSError) as exc:
+                last_error = exc
+                if attempt < max_retries:
+                    import time
+                    wait = 2 ** attempt
+                    time.sleep(wait)
+
+        raise LLMClientError(
+            f"LLM 请求失败（已重试 {max_retries} 次）：{last_error!r}"
+        ) from last_error
+
+    def _send_request(
+        self, url: str, payload: dict, attempt: int
+    ) -> LLMResponse:
+        """发送单次 LLM 请求。"""
+        timeout = self.timeout_seconds * (2 ** attempt)
         request = urllib.request.Request(
             url=url,
             data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
@@ -87,7 +115,7 @@ class OpenAICompatibleChatClient:
         )
 
         try:
-            with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
+            with urllib.request.urlopen(request, timeout=timeout) as response:
                 response_text = response.read().decode("utf-8", errors="replace")
         except Exception as exc:  # noqa: BLE001
             raise LLMClientError(f"LLM 请求失败：{exc!r}") from exc

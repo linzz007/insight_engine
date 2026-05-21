@@ -1,6 +1,6 @@
 {
   "project": "Daily AI Insight Engine",
-  "current_learning_goal": "区分 Coding Agent Harness 与 Runtime Agent Harness，并学习 AGENTS.md、linter、CI 如何约束 AI 编程助手。",
+  "current_learning_goal": "理解 Harness 工程三层架构：Hook（插槽系统）、Linter（产物检查）、Stage（业务执行）的职责边界。",
   "last_updated": "2026-05-20",
   "completed": [
     "完成真实数据抓取 stage",
@@ -8,50 +8,47 @@
     "完成 LLM 结构化抽取 stage",
     "完成 ReAct 分析 stage",
     "完成 ReAct 报告生成 stage",
-    "完成 final quality hook",
-    "把旧的多个空壳 skill 合并为 daily_news_report 总 Skill 和 3 个子 Skill",
+    "合并 skill 为 daily_news_report 总 Skill 和 3 个子 Skill",
     "新增 conversation router，让普通对话和日报生成分流",
     "新增可执行 Skill 层 daily_news_report.py",
-    "回退 collect 阶段核心源强制重试代码，数据源数量优先通过 config/sources.json 调整",
     "补齐 AGENTS.md 中 Coding Agent Harness 与 Runtime Agent Harness 的边界说明",
     "增强 scripts/harness_linter.py，让项目级 AI 编程规则可被静态检查",
-    "新增 .github/workflows/harness.yml，让 compileall、harness_linter 和 pytest 可在 CI 中自动运行"
+    "新增 .github/workflows/harness.yml",
+    "重构 Hook 系统为 StageHooks 插槽系统：linter 作为 after-stage 监听器注册在插槽上",
+    "删除 review_and_eval stage（与 generate_report linter 功能重叠）",
+    "将 quality_check 的数量检查合并到 collect/clean/structure 三个 linter 中",
+    "删除 final_quality_hook.py（名不副实——它返回 pass/fail 判断，是 linter 不是 hook）",
+    "graph 只通过 fire_before/fire_after 与钩子交互，不再硬编码调用特定 hook 函数"
   ],
   "active_harness_concepts": [
-    "Coding Agent Harness 管 AI 编程助手如何改仓库",
-    "Runtime Agent Harness 管本项目自己的新闻分析 Agent 如何运行",
+    "StageHooks 插槽系统：on_before / on_after 注册，fire_before / fire_after 触发",
+    "Hook（真正的）：观察、快照、记录——不影响流程路由。例：snapshot_prompt, record_trace, snapshot_state",
+    "Linter：检查产物合同，返回 passed/retryable——graph 据此决策。例：linters/generate_report.py",
+    "Stage：执行业务逻辑，产出 artifact。例：stages/generate_report.py",
+    "Tool Gateway：运行时工具白名单控制",
+    "Context Router：每个 stage 能看到的 state 字段和运行时文档",
     "AGENTS.md 管 Codex / Claude Code / Cursor 的长期项目规则",
     "feature_list.json 管功能完成标准",
-    "progress.json 管跨会话学习进度和下一步计划",
+    "progress.json 管跨会话学习进度",
     "scripts/harness_linter.py 把项目级规则变成可执行检查",
-    "CI 把 compileall、harness_linter 和 tests 变成自动约束",
-    "State 管共享数据",
-    "Graph 管流程路由",
-    "Stage Gate 管每步产物是否合格",
-    "Hook 管 prompt/state/trace 快照和最终质量检查",
-    "Tool Gateway 管运行时工具白名单",
-    "Context Router 管每个 stage 能看到的上下文",
-    "Prompt Builder 管 prompt 快照",
-    "Skill Loader 管能力说明加载",
-    "Skill Executor 管可被对话 Agent 调用的真实业务能力",
-    "Conversation Router 管普通对话和业务 Skill 分流"
+    "CI 把 compileall、harness_linter 和 tests 变成自动约束"
   ],
   "next_steps": [
     {
       "order": 1,
-      "task": "学习 AGENTS.md，重点区分 Coding Agent Harness 和 Runtime Agent Harness"
+      "task": "亲手给 harness_linter.py 加一条新规则，触发一次 CI 报红，再修好它"
     },
     {
       "order": 2,
-      "task": "学习 scripts/harness_linter.py，理解文字规则如何变成可执行检查"
+      "task": "亲手在 tool_gateway 注册一个新工具并给某个 stage 授权"
     },
     {
       "order": 3,
-      "task": "学习 .github/workflows/harness.yml，理解 CI 如何约束 Codex/Claude Code 产出的代码"
+      "task": "亲手给 StageHooks 注册一个自定义 after 监听器（比如发通知）"
     },
     {
       "order": 4,
-      "task": "继续按 State -> Graph -> Stage Gate/Linter -> Hook 的顺序学习 runtime harness"
+      "task": "亲手加一个 pre-commit hook，让 harness_linter 在本地 commit 时拦截违规"
     }
   ]
 }

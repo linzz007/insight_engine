@@ -24,7 +24,6 @@ REQUIRED_FILES = [
     ".github/workflows/harness.yml",
     "docs/runtime/global_rules.md",
     "docs/runtime/final_output_format.md",
-    "docs/rubrics/quality_rubric.md",
     "src/insight_engine/conversation/router.py",
     "src/insight_engine/skill_executors/daily_news_report.py",
     "src/insight_engine/harness/state.py",
@@ -33,27 +32,20 @@ REQUIRED_FILES = [
     "src/insight_engine/harness/stage_runner.py",
     "src/insight_engine/harness/context_router.py",
     "src/insight_engine/harness/env.py",
-    "src/insight_engine/harness/skill_loader.py",
     "src/insight_engine/harness/prompt_builder.py",
-    "src/insight_engine/harness/tool_gateway.py",
     "src/insight_engine/harness/llm_client.py",
     "src/insight_engine/harness/hooks/stage_hooks.py",
     "src/insight_engine/harness/hooks/after_llm_call.py",
-    "src/insight_engine/harness/hooks/final_quality_hook.py",
 ]
 
 SKILL_FILES = [
     "skills/daily_news_report/SKILL.md",
-    "skills/data_preparation/SKILL.md",
-    "skills/news_analysis/SKILL.md",
-    "skills/report_generation/SKILL.md",
 ]
 
 PROMPT_FILES = [
     "prompts/agents/structuring_agent.md",
     "prompts/agents/analysis_agent.md",
     "prompts/agents/report_agent.md",
-    "prompts/agents/reviewer_agent.md",
 ]
 
 STAGE_LINTER_PAIRS = {
@@ -77,10 +69,6 @@ STAGE_LINTER_PAIRS = {
         "src/insight_engine/stages/generate_report.py",
         "src/insight_engine/linters/generate_report.py",
     ),
-    "review_and_eval": (
-        "src/insight_engine/agents/review_agent.py",
-        "src/insight_engine/linters/review_and_eval.py",
-    ),
 }
 
 DETERMINISTIC_STAGE_FILES = [
@@ -101,7 +89,6 @@ AGENTS_REQUIRED_PHRASES = [
     "Codex / Claude Code / Cursor",
     "state.py",
     "graph.py",
-    "tool_gateway.py",
     "run_artifact",
     "py -3 scripts/harness_linter.py",
 ]

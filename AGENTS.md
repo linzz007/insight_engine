@@ -21,12 +21,11 @@ Daily AI Insight Engine：从每日新闻信息中提取结构化洞察，生成
 
 ```text
 页面聊天
--> conversation router 判断用户意图
+-> conversation router 用 LLM 读取 skills/daily_news_report/SKILL.md 判断用户意图
 -> 普通问题：正常回复
--> 生成今日新闻分析报告：调用 daily_news_report_skill
+-> 日报请求：LLM 确认后调用 daily_news_report_skill
 -> daily_news_report_skill 启动 graph
--> graph 使用 state 跑完整流程
--> stage gate / hook / final quality hook 控制每一步
+-> graph 通过 StageHooks 插槽系统在每个 stage 前后触发 linter / trace / 快照
 -> 返回 report、chart_html、pipeline_summary 给页面
 ```
 
@@ -48,24 +47,18 @@ insight_engine/
 │   │   ├── global_rules.md                # 所有 LLM stage 共用的短规则
 │   │   └── final_output_format.md         # 最终报告和结构化输出格式
 │   └── rubrics/
-│       └── quality_rubric.md              # final quality hook 参考的质量标准
+│       └── quality_rubric.md              # report 质量评估参考标准
 │
 ├── prompts/
 │   └── agents/
 │       ├── structuring_agent.md           # 结构化 stage 的角色说明
 │       ├── analysis_agent.md              # 分析 stage 的角色说明
 │       ├── report_agent.md                # 报告生成 stage 的角色说明
-│       └── reviewer_agent.md              # 最终质量检查 stage 的角色说明
+│       └── reviewer_agent.md              # （保留以备后续 LLM 审阅 stage 使用）
 │
 ├── skills/
-│   ├── daily_news_report/
-│   │   └── SKILL.md                       # 对话 Agent 可调用的完整日报能力说明
-│   ├── data_preparation/
-│   │   └── SKILL.md                       # 数据获取、清洗、结构化整理的能力说明
-│   ├── news_analysis/
-│   │   └── SKILL.md                       # 洞察分析和受限 ReAct 动作说明
-│   └── report_generation/
-│       └── SKILL.md                       # 报告、图表、最终质量 hook 的能力说明
+│   └── daily_news_report/
+│       └── SKILL.md                       # LLM 读取此文件判断是否触发日报 Skill
 │
 ├── scripts/
 │   └── harness_linter.py                  # 静态 Harness 约束检查，适合放进 CI
@@ -82,24 +75,20 @@ insight_engine/
 │       │   ├── stage_gates.py             # 每个 stage 结束后的产物规则检查
 │       │   ├── stage_runner.py            # 单 stage 调试运行辅助
 │       │   ├── context_router.py          # 控制每个 stage 能看到哪些 state 和文档
-│       │   ├── skill_loader.py            # 把 Skill 文档加载进需要 LLM 的 stage
 │       │   ├── prompt_builder.py          # 生成 prompt 快照，便于审计和复现
 │       │   ├── tool_gateway.py            # 工具调用入口和白名单控制
 │       │   ├── llm_client.py              # OpenAI-compatible / DeepSeek 调用封装
 │       │   └── hooks/
-│       │       ├── stage_hooks.py         # stage 前后快照和 trace 记录
+│       │       ├── stage_hooks.py         # StageHooks 插槽系统和默认监听器（linter 挂在这里）
 │       │       ├── after_llm_call.py      # LLM 输出解析和基础结构检查
-│       │       └── final_quality_hook.py  # 最终报告质量检查和回退建议
 │       ├── stages/
 │       │   ├── collect_raw_items.py       # 抓取 global 与 AI 两条数据线
 │       │   ├── clean_items.py             # 清洗、去重、打标签、保留非 AI 信息
 │       │   ├── structure_events.py        # LLM 或 fallback 生成结构化事件
 │       │   ├── analyze_insights.py        # 受限 ReAct 分析热点、趋势、风险机会
 │       │   └── generate_report.py         # 受限 ReAct 生成报告、图表和 manifest
-│       ├── agents/
-│       │   └── review_agent.py            # 触发 final quality hook 并写 review_result
-│       └── tools/
-│           └── quality_check.py           # final quality hook 使用的本地质量规则
+│       ├── agents/                                    # agent stage 处理器（当前为空）
+│       └── tools/                                     # 运行时工具（注册在 tool_gateway）
 │
 ├── tests/
 │   ├── conftest.py                        # 测试路径配置
@@ -116,7 +105,7 @@ insight_engine/
 │   └── llm/{run_id}/                      # LLM 原始响应
 │
 └── outputs/
-    ├── reports/{run_id}/                  # Markdown 报告和最终质量 hook
+    ├── reports/{run_id}/                  # Markdown / HTML 报告和 chart_data
     ├── charts/{run_id}/                   # HTML 图表和 chart_data
     └── pipeline/{run_id}/                 # 完整流程摘要
 ```
@@ -138,14 +127,14 @@ insight_engine/
 3. `structure_events` 可以调用 LLM，但必须保留 prompt、LLM 响应、schema 校验和 fallback。
 4. `analyze_insights` 可以使用受限 ReAct loop，但 action 必须白名单化。
 5. `generate_report` 可以使用受限 ReAct loop，但必须输出 Markdown、chart_data、charts.html、manifest。
-6. `review_and_eval` 只触发 final quality hook，不再引入独立 eval 概念。
+6. `generate_report` 的 stage gate 会自动检查报告、HTML、图表和 chart_data 质量。
 
 ## 产物规则
 
 每次完整运行必须尽量保留以下链路：
 
 ```text
-raw_items -> cleaned_items -> structured_events -> analysis_result -> report/chart -> final_quality_hook -> pipeline_summary
+raw_items -> cleaned_items -> structured_events -> analysis_result -> report/chart -> pipeline_summary
 ```
 
 中间产物目录：
@@ -170,13 +159,15 @@ outputs/pipeline/{run_id}/
 5. 不允许静默删除非 AI 信息；应保留并打标签，便于追踪。
 6. 修改确定性 stage 后，必须运行 `py -3 scripts/harness_linter.py`。
 7. 修改完整流程后，必须运行 `py -3 run_chat.py "帮我生成今日新闻分析报告"` 或 `py -3 run_full_pipeline.py --show`。
+8. 修改代码的时候使用的技术必须是确实是这个技术而不是文件名是这个技术而已，比如说实现一个skills那么就必须按照正常的标准去实现一个skills然后调用方式也要符合标准而不是直接写一个文件名叫做skill而已
+9. 修改文件添加文件的时候需要加上函数和文件的中文注释
 
 ## 学习顺序
 
 当前推荐学习路线：
 
 ```text
-State -> Graph -> Stage Gate/Linter -> Hook -> Prompt Builder -> Skill Loader -> Skill Executor -> Conversation Router -> ReAct Stage -> CI
+State -> Graph -> Stage Gate/Linter -> Hook -> Prompt Builder -> Skill Executor -> Conversation Router (LLM 意图分类) -> ReAct Stage -> CI
 
 ```
 

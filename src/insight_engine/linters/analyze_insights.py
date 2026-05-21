@@ -1,4 +1,9 @@
-"""Linter for analyze_insights stage."""
+"""analyze_insights stage 的运行时产物检查。
+
+这个文件检查 Stage 4 产出的 `analysis_result` 是否足够完整，能不能被报告生成阶段
+直接消费。它重点检查分析字段、Top 事件展示字段、趋势理由和风险/机会证据，
+防止 LLM 或 fallback 只产出空泛总结。
+"""
 
 from __future__ import annotations
 
@@ -21,7 +26,15 @@ ANALYSIS_REQUIRED_KEYS = [
 
 
 def lint(state: InsightEngineState) -> dict[str, Any]:
-    """检查 Stage 4 analysis_result 是否完整，并且关键判断包含理由。"""
+    """检查 Stage 4 的 analysis_result 是否符合报告阶段的输入合同。
+
+    这个函数不是重新做分析，而是检查分析结果能不能支撑最终报告：
+    - 顶层必填字段要齐全。
+    - summary / summary_reason 要有可读内容。
+    - AI Top 事件和 global Top 事件数量要合理。
+    - Top 事件必须保留来源、时间、方向、标签、热度等展示字段。
+    - 趋势判断和风险/机会提示必须带理由和 supporting_event_ids。
+    """
     analysis = state.analysis_result
     issues = []
     missing = [key for key in ANALYSIS_REQUIRED_KEYS if key not in analysis]
@@ -115,7 +128,11 @@ def validate_event_display_fields(
     field_name: str,
     allowed_areas: set[str],
 ) -> list[str]:
-    """检查 Top 事件是否保留 Stage 5 可视化展示需要的结构字段。"""
+    """检查 Top 事件是否保留 Stage 5 报告和图表需要的展示字段。
+
+    Stage 5 不应该再猜 source、published_at、industry_area、topic_tags、
+    hotness_score 等结构字段，所以这里提前检查 Stage 4 是否把这些字段传下来了。
+    """
     issues: list[str] = []
     for index, event in enumerate(events):
         if not isinstance(event, dict):
@@ -145,6 +162,10 @@ def validate_event_display_fields(
 
 
 def _is_missing_display_value(value: Any) -> bool:
+    """判断一个展示字段是否等价于缺失。
+
+    字符串空白、空 list 和 None 都会被视为缺失；数字、布尔值等非空标量会保留。
+    """
     if value is None:
         return True
     if isinstance(value, str):
